@@ -35,6 +35,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#include <conio.h>
 
 #else
 #include <sys/ioctl.h>
@@ -42,6 +43,9 @@
 #endif
 
 using namespace std;
+
+static int SCREEN_HEIGHT;
+static int SCREEN_WIDTH;
 
 class Screen {
 public:
@@ -54,6 +58,8 @@ public:
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         size_x = csbi.srWindow.Right - csbi.srWindow.Left + 1;
         size_y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+        SCREEN_WIDTH = size_x;
+        SCREEN_HEIGHT = size_y;
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -75,13 +81,16 @@ class Menu {
 public:
     Menu() = default;
 
-    static void showMenu() {
+    static vector<vector<char>> showMenu() {
+        vector<vector<char>> canvas;
+
         cout << CLEAR;
-        cout << MAGENTA << "Welcom to " << CYAN << "LionFeeding" << RESET << endl;
+        cout << MAGENTA << "Welcome to " << CYAN << "LionFeeding" << RESET << endl;
         cout << "For selected input number on menu and press to enter" << endl;
         cout << "1. " << CYAN << "Start Game vs PC" << RESET << endl;
         cout << "2. " << CYAN << "Start Game 1 vs 1" << RESET << endl;
         cout << "3. " << GREEN << "Exit" << RESET << endl;
+        return canvas;
     }
 
     static void showDifficulty() {
@@ -105,4 +114,5 @@ public:
 int main() {
     Screen screen;
     screen.printSize();
+    getch();
 }

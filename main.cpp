@@ -30,8 +30,15 @@ public:
 #endif
     }
 
+    Screen(const Screen &screen) {
+        size_x:
+        screen.size_x;
+        size_y:
+        screen.size_y;
+    }
+
     void printSize() const {
-        cout << "x = " << size_x << ",   y = " << size_y <<endl;
+        cout << "x = " << size_x << ",   y = " << size_y << endl;
     }
 };
 

@@ -3,7 +3,6 @@
 #include <vector>
 #include <random>
 #include <unistd.h>
-#include <termios.h>
 #include <ctime>
 #include <fcntl.h>
 #include <algorithm>
@@ -75,4 +74,7 @@ int main() {
     Screen screen;
     screen.printSize();
 }
+
+
+
 

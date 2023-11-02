@@ -58,14 +58,14 @@ public:
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         size_x = csbi.srWindow.Right - csbi.srWindow.Left + 1;
         size_y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-        SCREEN_WIDTH = size_x;
-        SCREEN_HEIGHT = size_y;
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
         size_y = size.ws_row;
         size_x = size.ws_col;
 #endif
+        SCREEN_WIDTH = size_x;
+        SCREEN_HEIGHT = size_y;
     }
 
     Screen(const Screen &screen)

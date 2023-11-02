@@ -83,6 +83,8 @@ public:
 
     static vector<vector<char>> showMenu() {
         vector<vector<char>> canvas;
+        canvas.resize(SCREEN_HEIGHT);
+        for(auto i:canvas) i.resize(SCREEN_WIDTH);
 
         cout << CLEAR;
         cout << MAGENTA << "Welcome to " << CYAN << "LionFeeding" << RESET << endl;

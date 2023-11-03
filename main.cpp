@@ -3,10 +3,10 @@
 #include <vector>
 
 
-//#define RESET   "\033[0m"
+#define RESET   "\033[0m"
 //#define BLACK   "\033[30m"      /* Black */
 //#define RED     "\033[31m"      /* Red */
-//#define GREEN   "\033[32m"      /* Green */
+#define GREEN   "\033[32m"      /* Green */
 //#define YELLOW  "\033[33m"      /* Yellow */
 //#define BLUE    "\033[34m"      /* Blue */
 //#define MAGENTA "\033[35m"      /* Magenta */
@@ -76,9 +76,9 @@ public:
     Screen(const Screen &screen)
     = default;
 
-    void printSize() const {
-        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << "\n";
-    }
+//    void printSize() const {
+//        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << "\n";
+//    }
 
     static void Write(vector<vector<char>> scene) {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
@@ -94,15 +94,16 @@ public:
 
 
 class Menu {
-private:
+public:
+    int point = 1;
     vector<string> menu_items{
             "Menu",
             "1.  Graphic  ",
-            "3.  Table    ",
-            "4.  Animation",
-            "5.  Hui      ",
+            "2.  Table    ",
+            "3.  Animation",
+            "4.  Hui      ",
     };
-public:
+
     Menu() = default;
 
     vector<vector<char>> render() {
@@ -119,26 +120,24 @@ public:
             }
         }
 
-//        cout << CLEAR;
-//        cout << MAGENTA << "Welcome to " << CYAN << "LionFeeding" << RESET << endl;
-//        cout << "For selected input number on menu and press to enter" << endl;
-//        cout << "1. " << CYAN << "Start Game vs PC" << RESET << endl;
-//        cout << "2. " << CYAN << "Start Game 1 vs 1" << RESET << endl;
-//        cout << "3. " << GREEN << "Exit" << RESET << endl;
+        size_t y_point = y_start + point;
+        size_t x_point = (SCREEN_WIDTH - menu_items[1].size()) / 2 - 2;
+        canvas[y_point][x_point] = '*';
+
         return canvas;
     }
 };
 
 
 int main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
+    ios::sync_with_stdio(false);
 
     Screen screen;
     Menu menu;
     while (true) {
         Screen::Write(menu.render());
         int input = getch();
+        cout << input;
         switch (input) {
             case 49: // 1
                 cout << 1 << endl;
@@ -155,9 +154,19 @@ int main() {
             case 53: // 5
                 cout << 5 << endl;
                 break;
+            case 80: // up
+                if (menu.point < (menu.menu_items.size() - 1)) menu.point += 1;
+                break;
+            case 72: // down
+                if (menu.point > 1) menu.point -= 1;
+                break;
+            case 13: // enter
+                break;
             case 27: // esc
                 cout << CLEAR;
                 exit(1);
+            default:
+                break;
         }
     }
 }

@@ -77,7 +77,7 @@ public:
     = default;
 
     void printSize() const {
-        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << endl;
+        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << "\n";
     }
 
     static void Write(vector<vector<char>> scene) {
@@ -87,7 +87,7 @@ public:
                     cout << scene[i][j];
                 else
                     cout << " ";
-            cout << endl;
+            cout << "\n";
         }
     }
 };
@@ -131,6 +131,9 @@ public:
 
 
 int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
     Screen screen;
     Menu menu;
     while (true) {

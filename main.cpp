@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cmath>
 
+#define _USE_MATH_DEFINES
 
 #define RESET   "\033[0m"
 //#define BLACK   "\033[30m"      /* Black */
@@ -51,31 +53,36 @@ int getch() {
 
 using namespace std;
 
+//Переменные высоты и ширины экрана
 static int SCREEN_HEIGHT;
 static int SCREEN_WIDTH;
 
+//Функция создания пустого экрана
+vector<vector<char>> generateCanvas(){
+    vector<vector<char>> canvas;
+    canvas.resize(SCREEN_HEIGHT);
+    for (auto &i: canvas) i.resize(SCREEN_WIDTH);
+    return canvas;
+}
+
+
+//Класс экрана
 class Screen {
 public:
-    vector<vector<char>> canvas;
 
     Screen() {
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
+        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
         SCREEN_HEIGHT = size.ws_row;
         SCREEN_WIDTH = size.ws_col;
 #endif
-        canvas.resize(SCREEN_HEIGHT);
-        for (auto &i: canvas) i.resize(SCREEN_WIDTH);
     }
-
-    Screen(const Screen &screen)
-    = default;
 
     static void Write(vector<vector<char>> scene) {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
@@ -107,9 +114,7 @@ public:
     Menu() = default;
 
     vector<vector<char>> render() {
-        vector<vector<char>> canvas;
-        canvas.resize(SCREEN_HEIGHT);
-        for (auto &i: canvas) i.resize(SCREEN_WIDTH);
+        vector<vector<char>> canvas = generateCanvas();
 
         size_t y_start = (SCREEN_HEIGHT - menu_items.size()) / 2;
 
@@ -133,13 +138,14 @@ public:
     Graphic() = default;
 
     vector<vector<char>> render() {
-        vector<vector<char>> canvas;
-        canvas.resize(SCREEN_HEIGHT);
-        for (auto &i: canvas) i.resize(SCREEN_WIDTH);
+        //Создание экрана
+        vector<vector<char>> canvas = generateCanvas();
 
-        const double xScale = SCREEN_WIDTH / (2 * 3.14159);
+        //Создание вспомогательных переменных для отрисовки графика
+        const double xScale = SCREEN_WIDTH / (2 * M_PI);
         const double yScale = SCREEN_HEIGHT / 2.0;
 
+        //Отрисовка координатной плоскости
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             canvas[SCREEN_HEIGHT / 2][x] = '-';
         }
@@ -148,15 +154,37 @@ public:
         }
         canvas[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = '+';
 
-        // Рисуем график sin(x)
+        //Рисуем график sin(x)
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
-            int y = static_cast<int>(round(sin(radians) * yScale)) + SCREEN_HEIGHT / 2;
-            if (y>=SCREEN_HEIGHT) break;
+            int y = static_cast<int>(round(function(radians) * yScale)) + SCREEN_HEIGHT / 2;
             canvas[y][x] = '*';
         }
 
         return canvas;
+    }
+private:
+    double function(double x) {
+        return sin(x);
+    }
+};
+
+class Integrals {
+public:
+    Integrals() = default;
+
+    vector<vector<char>> render() {
+        //Создание экрана
+        vector<vector<char>> canvas = generateCanvas();
+
+
+
+        return canvas;
+    }
+
+private:
+    double function(double x) {
+        return cos(x) * pow(M_E, x);
     }
 };
 
@@ -191,7 +219,7 @@ int main() {
             // Ваш код для обработки нажатия Enter
         }
         Sleep(100);
-//
+
 ////        switch (input) {
 ////            case 49: // 1
 //////                cout << 1 << endl;

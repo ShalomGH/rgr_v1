@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 
+
 #define _USE_MATH_DEFINES
 
 #define RESET   "\033[0m"
@@ -76,6 +77,7 @@ public:
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
         SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
+        system("chcp 65001");
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -208,26 +210,26 @@ public:
     ║Методом трапеций: -51.9869 ║
     ╚═══════════════════════════╝
  */
-    int point = 1;
     vector<string> menu_items{
-            "---------------------------------------",
-            "| cos(x) * pow(e, x) на отрезке [1,5]:|",
-            "---------------------------------------",
-            "---------------------------------------",
-            "| Методом прямоугольников:            |",
-            "---------------------------------------",
-            "---------------------------------------",
-            "| Методом трапеций:                   |",
-            "---------------------------------------",
+            "----------------------------------------",
+            "| cos(x) * pow(e, x) на отрезке [1,5]: |",
+            "----------------------------------------",
+            "----------------------------------------",
+            "| Методом прямоугольников:             |",
+            "----------------------------------------",
+            "----------------------------------------",
+            "| Методом трапеций:                    |",
+            "----------------------------------------",
     };
 
     vector<vector<char>> render() {
         vector<vector<char>> canvas = generateCanvas();
 
         size_t y_start = (SCREEN_HEIGHT - menu_items.size()) / 2;
+        size_t x_start = (SCREEN_WIDTH - menu_items[0].size()) / 2;
 
         for (int i = 0; i < menu_items.size(); i++) {
-            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
+
             for (int j = 0; j < menu_items[i].size(); j++) {
                 canvas[i + y_start][j + x_start] = menu_items[i][j];
             }
@@ -238,13 +240,13 @@ public:
         answers[1] = to_string(rectangleMethod());
 
         int k = 0;
-        for (int i = 4; i < menu_items.size(); i+=3) {
-            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
-            for (int j = 29; j < 37; j++) {
-                canvas[i + y_start][j + x_start] = answers[k][j-29];
-            }
-            k+=1;
-        }
+//        for (int i = 4; i < menu_items.size(); i+=3) {
+//            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
+//            for (int j = 29; j < 37; j++) {
+//                canvas[i + y_start][j + x_start] = answers[k][j-29];
+//            }
+//            k+=1;
+//        }
 
         return canvas;
     }
@@ -252,6 +254,7 @@ public:
 
 
 int main() {
+    //setlocale(LC_ALL, "RUS");
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 

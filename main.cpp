@@ -28,8 +28,6 @@
 #ifdef _WIN32
 
 #include <windows.h>
-#include <conio.h>
-#include <valarray>
 
 #else
 
@@ -75,7 +73,6 @@ public:
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
         SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
-        system("chcp 65001");
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -84,7 +81,7 @@ public:
 #endif
     }
 
-    static void Write(vector<vector<char>> scene) {
+    void render(vector<vector<char>> scene) {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
                 if (scene[i][j]) {
@@ -101,49 +98,155 @@ public:
 
 
 class Menu {
-public:
+private:
     int point = 1;
-    vector<string> menu_items{
+    const vector<string> menu_items{
             "Menu",
-            "1.  Graphics ",
-            "2.  Table    ",
-            "3.  Animation",
-            "4.  .!.      ",
+            "1.  Table    ",
+            "2.  Graphics ",
+            "3.  Equation ",
+            "4.  Integrals",
+            "5.  Animation",
+            "6.  Author   ",
+            "7.  Exit     ",
     };
+    vector<vector<char>> canvas;
 
-    Menu() = default;
+    const size_t y_start = (SCREEN_HEIGHT - menu_items.size()) / 2;
+    const size_t x_start = (SCREEN_WIDTH - menu_items[1].size()) / 2;
 
-    vector<vector<char>> render() {
-        vector<vector<char>> canvas = generateCanvas();
+    size_t y_point = y_start + point;
+    const size_t x_point = x_start-2;
 
-        size_t y_start = (SCREEN_HEIGHT - menu_items.size()) / 2;
+public:
+    Menu() {
+        canvas = generateCanvas();
+        moveMenuItemsIntoCanvas();
+    }
 
+    vector<vector<char>> getCanvas() {
+        checkPointPosition();
+        return canvas;
+    }
+
+    int getPoint() {
+        return point;
+    }
+    void movePointDown() {
+        if(point<7) point++;
+    }
+    void movePointUp() {
+        if(point>1) point--;
+    }
+
+private:
+    void checkPointPosition() {
+        if(y_start+point!=y_point) {
+            canvas[y_point][x_point] = ' ';
+            y_point = y_start + point;
+            canvas[y_point][x_point] = '*';
+        }
+    }
+
+    void moveMenuItemsIntoCanvas() {
         for (int i = 0; i < menu_items.size(); i++) {
-            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
             for (int j = 0; j < menu_items[i].size(); j++) {
                 canvas[i + y_start][j + x_start] = menu_items[i][j];
             }
         }
-
-        size_t y_point = y_start + point;
-        size_t x_point = (SCREEN_WIDTH - menu_items[1].size()) / 2 - 2;
         canvas[y_point][x_point] = '*';
+    }
+};
 
+class Table {
+
+
+private:
+    const int N = 10;
+    const int A = 1;
+    const int B = 2;
+    const double dX = fabs(B - A) / (N - 1.0);
+    size_t y_start;
+    size_t x_start;
+    vector<vector<char>> canvas;
+    vector<string> menuItems;
+
+public:
+    Table() {
+        canvas = generateCanvas();
+
+        fillMenuItems();
+        y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
+        x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
+        moveMenuItemsIntoCanvas();
+
+    }
+/*
+                                _____________________________________________
+                                |       i|    x[i]|       F1[i]|       F2[i]|
+                                |___________________________________________|
+                                |       1|       1|     6.54759|     3.33333|
+                                |       2| 1.11111|     8.33162|      3.0916|
+                                |       3| 1.22222|     10.5843|     2.86219|
+                                |       4| 1.33333|       13.42|     2.64706|
+                                |       5| 1.44444|     16.9813|     2.44713|
+                                |       6| 1.55556|     21.4461|     2.26257|
+                                |       7| 1.66667|     27.0362|     2.09302|
+                                |       8| 1.77778|     34.0286|      1.9378|
+                                |       9| 1.88889|     42.7689|     1.79601|
+                                |      10|       2|     53.6889|     1.66667|
+                                |___________________________________________|
+
+                                Минимальный элемент первой функции:-9.25596e+61
+                                Максимальный элемент первой функции:8.33162
+                                Минимальный элемент второй функции:-9.25596e+61
+                                Максимальный элемент второй функции:10.5843
+ */
+    vector<vector<char>> getCanvas() {
         return canvas;
+    }
+
+private:
+    double F1(double x) {
+        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+    }
+
+    double F2(double x) {
+        return 10 / (2 + x * x);
+    }
+
+    void fillMenuItems() {
+        menuItems.push_back("_____________________________________________");
+        menuItems.push_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
+        menuItems.push_back("|___________________________________________|");
+        for (int i = 0; i<N; i++) {
+            if (i<9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
+            else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
+        }
+        menuItems.emplace_back("|___________________________________________|");
+    }
+
+    void moveMenuItemsIntoCanvas() {
+        for (int i = 0; i < menuItems.size(); i++) {
+            for (int j = 0; j < menuItems[i].size(); j++) {
+                canvas[i + y_start][j + x_start] = menuItems[i][j];
+            }
+        }
     }
 };
 
 class Graphic {
+private:
+    //Создание экрана
+    vector<vector<char>> canvas;
+
+    //Создание вспомогательных переменных для отрисовки графика
+    const double xScale = SCREEN_WIDTH / (2 * M_PI);
+    const double yScale = SCREEN_HEIGHT / 2.0;
+
 public:
-    Graphic() = default;
-
-    static vector<vector<char>> render() {
-        //Создание экрана
-        vector<vector<char>> canvas = generateCanvas();
-
-        //Создание вспомогательных переменных для отрисовки графика
-        const double xScale = SCREEN_WIDTH / (2 * M_PI);
-        const double yScale = SCREEN_HEIGHT / 2.0;
+    Graphic() {
+        canvas = generateCanvas();
 
         //Отрисовка координатной плоскости
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
@@ -160,59 +263,23 @@ public:
             int y = static_cast<int>(round(function(radians) * yScale)) + SCREEN_HEIGHT / 2;
             canvas[y][x] = '*';
         }
+    }
 
+    vector<vector<char>> getCanvas() {
         return canvas;
     }
 
 private:
-    static double function(double x) {
+    double function(double x) {
         return sin(x);
     }
 };
 
+
 class Integrals {
-private:
-    const int A = 1;
-    const int B = 5;
-    const int N = 10000;
-    const double H = fabs(B - A) / N;
-    const double e = 0.001;
-
-
-    double function(double x) {
-        return cos(x) * pow(M_E, x);
-    }
-
-    double trapezeMethod() {
-        double s = function(A) + function(B);
-        for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
-        return (H / 2) * s;
-    }
-    double rectangleMethod() {
-        double s = 0;
-        for (double x = B; x > A; x -= e) s += function(x) * e;
-        return s;
-    }
-//    double threeMethod(){
-//        double s = 0;
-//        for (double x = B; x > A; x -= e) s += function(x) * e;
-//        return s;
-//    }
-
 public:
 
     Integrals() = default;
-/*
-    ╔═════════════════════════════════════╗
-    ║cos(x) * pow(e, x) на отрезке [1,5]: ║
-    ╚═════════════════════════════════════╝
-    ╔══════════════════════════════════╗
-    ║Методом прямоугольников: -51.9692 ║
-    ╚══════════════════════════════════╝
-    ╔═══════════════════════════╗
-    ║Методом трапеций: -51.9869 ║
-    ╚═══════════════════════════╝
- */
     vector<string> menu_items{
             "--------------------------------------------",
             "| cos(x) * pow(e, x) on the segment [1,5]: |",
@@ -241,7 +308,6 @@ public:
         string answers[2];
         answers[0] = to_string(trapezeMethod());
         answers[1] = to_string(rectangleMethod());
-        cout << answers[0] << " " << answers[1];
         int k = 0;
         for (int i = 4; i < menu_items.size(); i+=3) {
             for (int j = 35; j < 41; j++) {
@@ -252,6 +318,28 @@ public:
 
         return canvas;
     }
+private:
+    const int A = 1;
+    const int B = 5;
+    const int N = 10000;
+    const double H = fabs(B - A) / N;
+    const double e = 0.001;
+
+
+    double function(double x) {
+        return cos(x) * pow(M_E, x);
+    }
+
+    double trapezeMethod() {
+        double s = function(A) + function(B);
+        for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
+        return (H / 2) * s;
+    }
+    double rectangleMethod() {
+        double s = 0;
+        for (double x = B; x > A; x -= e) s += function(x) * e;
+        return s;
+    }
 };
 
 
@@ -259,47 +347,60 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
+    /*
+     "Menu",
+            "1.  Table    ",
+            "2.  Graphics ",
+            "3.  Equation ",
+            "4.  Integrals",
+            "5.  Animation",
+            "6.  Author   ",
+            "7.  Exit     ",
+     */
 
     Screen screen;
+
     Menu menu;
+
+    Table table;
     Graphic graphic;
+
     Integrals integrals;
 
-    Screen::Write(menu.render());
-//    Screen::Write(in.render());
+
+    screen.render(menu.getCanvas());
+//    screen.render(in.render());
     while (true) {
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
-            if (menu.point > 1) {
-                menu.point--;
-                Screen::Write(menu.render());
-            }
+            menu.movePointUp();
+            screen.render(menu.getCanvas());
         } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
-            if (menu.point < (menu.menu_items.size() - 1)) {
-                menu.point++;
-                Screen::Write(menu.render());
-            }
+            menu.movePointDown();
+            screen.render(menu.getCanvas());
 
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+            screen.render(menu.getCanvas());
             break;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
-            switch (menu.point) {
+            switch (menu.getPoint()) {
                 case 1:
-                    Screen::Write(Graphic::render());
+                    screen.render(table.getCanvas());
                     break;
                 case 2:
-                    Screen::Write(integrals.render());
+                    screen.render(graphic.getCanvas());
                     break;
                 case 3:
                     break;
                 case 4:
+                    screen.render(integrals.render());
                     break;
                 case 5:
                     break;
                 case 6:
                     break;
                 case 7:
-                    break;
+                    exit(1);
                 default:
                     break;
             }
@@ -324,7 +425,7 @@ int main() {
                 menu.point = 5;
                 break;
             case 65: // up
-                if (menu.point < (menu.menu_items.size() - 1)) menu.point ++;
+                if (menu.point < (menu.menuItems.size() - 1)) menu.point ++;
                 break;
             case 66: // down
                 if (menu.point > 1) menu.point --;
@@ -333,7 +434,7 @@ int main() {
                 break;
             case 27: // esc
                 cout << CLEAR;
-                exit(1);
+//                exit(1);
             default:
                 break;
         }

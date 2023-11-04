@@ -75,6 +75,7 @@ public:
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
         SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
+        system("chcp 65001");
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -104,7 +105,7 @@ public:
     int point = 1;
     vector<string> menu_items{
             "Menu",
-            "1.  графика  ",
+            "1.  Graphics ",
             "2.  Table    ",
             "3.  Animation",
             "4.  .!.      ",
@@ -255,7 +256,7 @@ public:
 
 
 int main() {
-    //ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
 
@@ -264,8 +265,8 @@ int main() {
     Graphic graphic;
     Integrals integrals;
 
-    Screen::Write(integrals.render());
-//    Screen::Write(menu.render());
+    Screen::Write(menu.render());
+//    Screen::Write(in.render());
     while (true) {
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
@@ -282,7 +283,26 @@ int main() {
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
             break;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
-            // Ваш код для обработки нажатия Enter
+            switch (menu.point) {
+                case 1:
+                    Screen::Write(Graphic::render());
+                    break;
+                case 2:
+                    Screen::Write(integrals.render());
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                default:
+                    break;
+            }
         }
         Sleep(100);
 #else

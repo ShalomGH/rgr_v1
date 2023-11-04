@@ -58,7 +58,7 @@ static int SCREEN_HEIGHT;
 static int SCREEN_WIDTH;
 
 //Функция создания пустого экрана
-vector<vector<char>> generateCanvas(){
+vector<vector<char>> generateCanvas() {
     vector<vector<char>> canvas;
     canvas.resize(SCREEN_HEIGHT);
     for (auto &i: canvas) i.resize(SCREEN_WIDTH);
@@ -137,7 +137,7 @@ class Graphic {
 public:
     Graphic() = default;
 
-    vector<vector<char>> render() {
+    static vector<vector<char>> render() {
         //Создание экрана
         vector<vector<char>> canvas = generateCanvas();
 
@@ -163,28 +163,90 @@ public:
 
         return canvas;
     }
+
 private:
-    double function(double x) {
+    static double function(double x) {
         return sin(x);
     }
 };
 
 class Integrals {
-public:
-    Integrals() = default;
-
-    vector<vector<char>> render() {
-        //Создание экрана
-        vector<vector<char>> canvas = generateCanvas();
-
-
-
-        return canvas;
-    }
-
 private:
+    const int A = 1;
+    const int B = 5;
+    const int N = 10000;
+    const double H = fabs(B - A) / N;
+    const double e = 0.001;
+
+
     double function(double x) {
         return cos(x) * pow(M_E, x);
+    }
+
+    double trapezeMethod() {
+        double s = function(A) + function(B);
+        for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
+        return s;
+    }
+    double rectangleMethod() {
+        double s = 0;
+        for (double x = B; x > A; x -= e) s += function(x) * e;
+        return s;
+    }
+
+public:
+
+    Integrals() = default;
+/*
+    ╔═════════════════════════════════════╗
+    ║cos(x) * pow(e, x) на отрезке [1,5]: ║
+    ╚═════════════════════════════════════╝
+    ╔══════════════════════════════════╗
+    ║Методом прямоугольников: -51.9692 ║
+    ╚══════════════════════════════════╝
+    ╔═══════════════════════════╗
+    ║Методом трапеций: -51.9869 ║
+    ╚═══════════════════════════╝
+ */
+    int point = 1;
+    vector<string> menu_items{
+            "---------------------------------------",
+            "| cos(x) * pow(e, x) на отрезке [1,5]:|",
+            "---------------------------------------",
+            "---------------------------------------",
+            "| Методом прямоугольников:            |",
+            "---------------------------------------",
+            "---------------------------------------",
+            "| Методом трапеций:                   |",
+            "---------------------------------------",
+    };
+
+    vector<vector<char>> render() {
+        vector<vector<char>> canvas = generateCanvas();
+
+        size_t y_start = (SCREEN_HEIGHT - menu_items.size()) / 2;
+
+        for (int i = 0; i < menu_items.size(); i++) {
+            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
+            for (int j = 0; j < menu_items[i].size(); j++) {
+                canvas[i + y_start][j + x_start] = menu_items[i][j];
+            }
+        }
+
+        string answers[2];
+        answers[0] = to_string(trapezeMethod());
+        answers[1] = to_string(rectangleMethod());
+
+        int k = 0;
+        for (int i = 4; i < menu_items.size(); i+=3) {
+            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
+            for (int j = 29; j < 37; j++) {
+                canvas[i + y_start][j + x_start] = answers[k][j-29];
+            }
+            k+=1;
+        }
+
+        return canvas;
     }
 };
 
@@ -197,8 +259,9 @@ int main() {
     Screen screen;
     Menu menu;
     Graphic gr;
+    Integrals in;
 
-    Screen::Write(gr.render());
+    Screen::Write(in.render());
 //    Screen::Write(menu.render());
     while (true) {
 //        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка

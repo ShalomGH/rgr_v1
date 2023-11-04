@@ -138,7 +138,7 @@ public:
         for (auto &i: canvas) i.resize(SCREEN_WIDTH);
 
         const double xScale = SCREEN_WIDTH / (2 * 3.14159);
-        const double yScale = SCREEN_HEIGHT / 2;
+        const double yScale = SCREEN_HEIGHT / 2.0;
 
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             canvas[SCREEN_HEIGHT / 2][x] = '-';
@@ -150,8 +150,9 @@ public:
 
         // Рисуем график sin(x)
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            double radians = (x - SCREEN_WIDTH / 2) / xScale;
+            double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y = static_cast<int>(round(sin(radians) * yScale)) + SCREEN_HEIGHT / 2;
+            if (y>=SCREEN_HEIGHT) break;
             canvas[y][x] = '*';
         }
 

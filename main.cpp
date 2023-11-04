@@ -9,7 +9,7 @@
 #define GREEN   "\033[32m"      /* Green */
 //#define YELLOW  "\033[33m"      /* Yellow */
 //#define BLUE    "\033[34m"      /* Blue */
-//#define MAGENTA "\033[35m"      /* Magenta */
+#define MAGENTA "\033[35m"      /* Magenta */
 //#define CYAN    "\033[36m"      /* Cyan */
 //#define WHITE   "\033[37m"      /* White */
 //#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
@@ -61,8 +61,8 @@ public:
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top + 4;
+        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left + 13;
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -76,15 +76,19 @@ public:
     Screen(const Screen &screen)
     = default;
 
-//    void printSize() const {
-//        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << "\n";
-//    }
+    void printSize() const {
+        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << "\n";
+    }
 
     static void Write(vector<vector<char>> scene) {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
-                if (scene[i][j])
-                    cout << scene[i][j];
+                if (scene[i][j]) {
+                    if (scene[i][j] == ';') cout << GREEN;
+                    else if (scene[i][j] == '#') cout << MAGENTA;
+                    else if (scene[i][j] == '%') cout << RESET;
+                    else cout << scene[i][j];
+                }
                 else
                     cout << " ";
             cout << "\n";
@@ -98,8 +102,8 @@ public:
     int point = 1;
     vector<string> menu_items{
             "Menu",
-            "1.  Graphic  ",
-            "2.  Table    ",
+            "1.;  Graphic%",
+            "2.#  Table %",
             "3.  Animation",
             "4.  Hui      ",
     };
@@ -130,43 +134,70 @@ public:
 
 
 int main() {
-    ios::sync_with_stdio(false);
+//    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+//    setvbuf(stdout, NULL, _IOFBF, 4096); // Установка размера буфера вывода в 4541 байт
+
 
     Screen screen;
     Menu menu;
+//    screen.printSize();
+//    Screen::Write(screen.canvas);
+    Screen::Write(menu.render());
+//    screen.printSize();
     while (true) {
-        Screen::Write(menu.render());
-        int input = getch();
-        cout << input;
-        switch (input) {
-            case 49: // 1
-                cout << 1 << endl;
-                break;
-            case 50: // 2
-                cout << 2 << endl;
-                break;
-            case 51: // 3
-                cout << 3 << endl;
-                break;
-            case 52: // 4
-                cout << 4 << endl;
-                break;
-            case 53: // 5
-                cout << 5 << endl;
-                break;
-            case 80: // up
-                if (menu.point < (menu.menu_items.size() - 1)) menu.point += 1;
-                break;
-            case 72: // down
-                if (menu.point > 1) menu.point -= 1;
-                break;
-            case 13: // enter
-                break;
-            case 27: // esc
-                cout << CLEAR;
-                exit(1);
-            default:
-                break;
+        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
+            if (menu.point > 1) {
+                menu.point--;
+                Screen::Write(menu.render());
+            }
+        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
+            if (menu.point < (menu.menu_items.size() - 1)) {
+                menu.point++;
+                Screen::Write(menu.render());
+            }
+
+        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+            break;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
+            // Ваш код для обработки нажатия Enter
         }
+        Sleep(100);
+
+//        switch (input) {
+//            case 49: // 1
+////                cout << 1 << endl;
+//                menu.point = 1;
+//                break;
+//            case 50: // 2
+////                cout << 2 << endl;
+//                menu.point = 2;
+//                break;
+//            case 51: // 3
+////                cout << 3 << endl;
+//                menu.point = 3;
+//                break;
+//            case 52: // 4
+////                cout << 4 << endl;
+//                menu.point = 4;
+//                break;
+//            case 53: // 5
+////                cout << 5 << endl;
+//                menu.point = 5;
+//                break;
+//            case 65: // up
+//                if (menu.point < (menu.menu_items.size() - 1)) menu.point ++;
+//                break;
+//            case 66: // down
+//                if (menu.point > 1) menu.point --;
+//                break;
+//            case 13: // enter
+//                break;
+//            case 27: // esc
+//                cout << CLEAR;
+//                exit(1);
+//            default:
+//                break;
+//        }
     }
 }

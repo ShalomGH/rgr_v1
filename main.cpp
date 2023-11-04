@@ -61,8 +61,8 @@ public:
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top + 4;
-        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left + 13;
+        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -88,10 +88,9 @@ public:
                     else if (scene[i][j] == '#') cout << MAGENTA;
                     else if (scene[i][j] == '%') cout << RESET;
                     else cout << scene[i][j];
-                }
-                else
+                } else
                     cout << " ";
-            cout << "\n";
+            cout << endl;
         }
     }
 };
@@ -102,10 +101,10 @@ public:
     int point = 1;
     vector<string> menu_items{
             "Menu",
-            "1.;  Graphic%",
-            "2.#  Table %",
+            "1.  Graphic  ",
+            "2.  Table    ",
             "3.  Animation",
-            "4.  Hui      ",
+            "4.  .!.      ",
     };
 
     Menu() = default;
@@ -134,17 +133,13 @@ public:
 
 
 int main() {
-//    ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
-//    setvbuf(stdout, NULL, _IOFBF, 4096); // Установка размера буфера вывода в 4541 байт
 
 
     Screen screen;
     Menu menu;
-//    screen.printSize();
-//    Screen::Write(screen.canvas);
     Screen::Write(menu.render());
-//    screen.printSize();
     while (true) {
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
             if (menu.point > 1) {

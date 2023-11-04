@@ -27,6 +27,7 @@
 
 #include <windows.h>
 #include <conio.h>
+#include <valarray>
 
 #else
 
@@ -75,10 +76,6 @@ public:
 
     Screen(const Screen &screen)
     = default;
-
-    void printSize() const {
-        cout << "x = " << SCREEN_WIDTH << ",   y = " << SCREEN_HEIGHT << "\n";
-    }
 
     static void Write(vector<vector<char>> scene) {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
@@ -131,6 +128,37 @@ public:
     }
 };
 
+class Graphic {
+public:
+    Graphic() = default;
+
+    vector<vector<char>> render() {
+        vector<vector<char>> canvas;
+        canvas.resize(SCREEN_HEIGHT);
+        for (auto &i: canvas) i.resize(SCREEN_WIDTH);
+
+        const double xScale = SCREEN_WIDTH / (2 * 3.14159);
+        const double yScale = SCREEN_HEIGHT / 2;
+
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            canvas[SCREEN_HEIGHT / 2][x] = '-';
+        }
+        for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+            canvas[y][SCREEN_WIDTH / 2] = '|';
+        }
+        canvas[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = '+';
+
+        // Рисуем график sin(x)
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            double radians = (x - SCREEN_WIDTH / 2) / xScale;
+            int y = static_cast<int>(round(sin(radians) * yScale)) + SCREEN_HEIGHT / 2;
+            canvas[y][x] = '*';
+        }
+
+        return canvas;
+    }
+};
+
 
 int main() {
     ios::sync_with_stdio(false);
@@ -139,60 +167,64 @@ int main() {
 
     Screen screen;
     Menu menu;
-    Screen::Write(menu.render());
-    while (true) {
-        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
-            if (menu.point > 1) {
-                menu.point--;
-                Screen::Write(menu.render());
-            }
-        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
-            if (menu.point < (menu.menu_items.size() - 1)) {
-                menu.point++;
-                Screen::Write(menu.render());
-            }
+    Graphic gr;
 
-        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+    Screen::Write(gr.render());
+//    Screen::Write(menu.render());
+    while (true) {
+//        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
+//            if (menu.point > 1) {
+//                menu.point--;
+//                Screen::Write(menu.render());
+//            }
+//        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
+//            if (menu.point < (menu.menu_items.size() - 1)) {
+//                menu.point++;
+//                Screen::Write(menu.render());
+//            }
+//
+//        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
             break;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
             // Ваш код для обработки нажатия Enter
         }
         Sleep(100);
-
-//        switch (input) {
-//            case 49: // 1
-////                cout << 1 << endl;
-//                menu.point = 1;
-//                break;
-//            case 50: // 2
-////                cout << 2 << endl;
-//                menu.point = 2;
-//                break;
-//            case 51: // 3
-////                cout << 3 << endl;
-//                menu.point = 3;
-//                break;
-//            case 52: // 4
-////                cout << 4 << endl;
-//                menu.point = 4;
-//                break;
-//            case 53: // 5
-////                cout << 5 << endl;
-//                menu.point = 5;
-//                break;
-//            case 65: // up
-//                if (menu.point < (menu.menu_items.size() - 1)) menu.point ++;
-//                break;
-//            case 66: // down
-//                if (menu.point > 1) menu.point --;
-//                break;
-//            case 13: // enter
-//                break;
-//            case 27: // esc
-//                cout << CLEAR;
-//                exit(1);
-//            default:
-//                break;
-//        }
+//
+////        switch (input) {
+////            case 49: // 1
+//////                cout << 1 << endl;
+////                menu.point = 1;
+////                break;
+////            case 50: // 2
+//////                cout << 2 << endl;
+////                menu.point = 2;
+////                break;
+////            case 51: // 3
+//////                cout << 3 << endl;
+////                menu.point = 3;
+////                break;
+////            case 52: // 4
+//////                cout << 4 << endl;
+////                menu.point = 4;
+////                break;
+////            case 53: // 5
+//////                cout << 5 << endl;
+////                menu.point = 5;
+////                break;
+////            case 65: // up
+////                if (menu.point < (menu.menu_items.size() - 1)) menu.point ++;
+////                break;
+////            case 66: // down
+////                if (menu.point > 1) menu.point --;
+////                break;
+////            case 13: // enter
+////                break;
+////            case 27: // esc
+////                cout << CLEAR;
+////                exit(1);
+////            default:
+////                break;
+////        }
     }
 }

@@ -3,8 +3,7 @@
 #include <vector>
 #include <cmath>
 
-
-#define _USE_MATH_DEFINES
+#define USE_MATH_DEFINES
 
 #define RESET   "\033[0m"
 //#define BLACK   "\033[30m"      /* Black */
@@ -67,7 +66,7 @@ vector<vector<char>> generateCanvas() {
 }
 
 
-//Класс экрана
+
 class Screen {
 public:
 
@@ -107,7 +106,7 @@ public:
     int point = 1;
     vector<string> menu_items{
             "Menu",
-            "1.  Graphic  ",
+            "1.  графика  ",
             "2.  Table    ",
             "3.  Animation",
             "4.  .!.      ",
@@ -267,59 +266,56 @@ int main() {
     Screen::Write(in.render());
 //    Screen::Write(menu.render());
     while (true) {
-//        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
-//            if (menu.point > 1) {
-//                menu.point--;
-//                Screen::Write(menu.render());
-//            }
-//        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
-//            if (menu.point < (menu.menu_items.size() - 1)) {
-//                menu.point++;
-//                Screen::Write(menu.render());
-//            }
-//
-//        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
-        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+#ifdef _WIN32
+        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
+            if (menu.point > 1) {
+                menu.point--;
+                Screen::Write(menu.render());
+            }
+        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
+            if (menu.point < (menu.menu_items.size() - 1)) {
+                menu.point++;
+                Screen::Write(menu.render());
+            }
+
+        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
             break;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
             // Ваш код для обработки нажатия Enter
         }
         Sleep(100);
-
-////        switch (input) {
-////            case 49: // 1
-//////                cout << 1 << endl;
-////                menu.point = 1;
-////                break;
-////            case 50: // 2
-//////                cout << 2 << endl;
-////                menu.point = 2;
-////                break;
-////            case 51: // 3
-//////                cout << 3 << endl;
-////                menu.point = 3;
-////                break;
-////            case 52: // 4
-//////                cout << 4 << endl;
-////                menu.point = 4;
-////                break;
-////            case 53: // 5
-//////                cout << 5 << endl;
-////                menu.point = 5;
-////                break;
-////            case 65: // up
-////                if (menu.point < (menu.menu_items.size() - 1)) menu.point ++;
-////                break;
-////            case 66: // down
-////                if (menu.point > 1) menu.point --;
-////                break;
-////            case 13: // enter
-////                break;
-////            case 27: // esc
-////                cout << CLEAR;
-////                exit(1);
-////            default:
-////                break;
-////        }
+#else
+        char input = getch();
+        switch (input) {
+            case 49: // 1
+                menu.point = 1;
+                break;
+            case 50: // 2
+                menu.point = 2;
+                break;
+            case 51: // 3
+                menu.point = 3;
+                break;
+            case 52: // 4
+                menu.point = 4;
+                break;
+            case 53: // 5
+                menu.point = 5;
+                break;
+            case 65: // up
+                if (menu.point < (menu.menu_items.size() - 1)) menu.point ++;
+                break;
+            case 66: // down
+                if (menu.point > 1) menu.point --;
+                break;
+            case 13: // enter
+                break;
+            case 27: // esc
+                cout << CLEAR;
+                exit(1);
+            default:
+                break;
+        }
+#endif
     }
 }

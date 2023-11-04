@@ -69,14 +69,12 @@ vector<vector<char>> generateCanvas() {
 
 class Screen {
 public:
-
     Screen() {
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
         SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
-        system("chcp 65001");
 #else
         struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -187,13 +185,18 @@ private:
     double trapezeMethod() {
         double s = function(A) + function(B);
         for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
-        return s;
+        return (H / 2) * s;
     }
     double rectangleMethod() {
         double s = 0;
         for (double x = B; x > A; x -= e) s += function(x) * e;
         return s;
     }
+//    double threeMethod(){
+//        double s = 0;
+//        for (double x = B; x > A; x -= e) s += function(x) * e;
+//        return s;
+//    }
 
 public:
 
@@ -210,15 +213,15 @@ public:
     ╚═══════════════════════════╝
  */
     vector<string> menu_items{
-            "----------------------------------------",
-            "| cos(x) * pow(e, x) на отрезке [1,5]: |",
-            "----------------------------------------",
-            "----------------------------------------",
-            "| Методом прямоугольников:             |",
-            "----------------------------------------",
-            "----------------------------------------",
-            "| Методом трапеций:                    |",
-            "----------------------------------------",
+            "--------------------------------------------",
+            "| cos(x) * pow(e, x) on the segment [1,5]: |",
+            "--------------------------------------------",
+            "--------------------------------------------",
+            "| Rectangle method:                        |",
+            "--------------------------------------------",
+            "--------------------------------------------",
+            "| Trapeze method:                          |",
+            "--------------------------------------------",
     };
 
     vector<vector<char>> render() {
@@ -237,15 +240,14 @@ public:
         string answers[2];
         answers[0] = to_string(trapezeMethod());
         answers[1] = to_string(rectangleMethod());
-
+        cout << answers[0] << " " << answers[1];
         int k = 0;
-//        for (int i = 4; i < menu_items.size(); i+=3) {
-//            size_t x_start = (SCREEN_WIDTH - menu_items[i].size()) / 2;
-//            for (int j = 29; j < 37; j++) {
-//                canvas[i + y_start][j + x_start] = answers[k][j-29];
-//            }
-//            k+=1;
-//        }
+        for (int i = 4; i < menu_items.size(); i+=3) {
+            for (int j = 35; j < 41; j++) {
+                canvas[i + y_start][j + x_start] = answers[k][j-35];
+            }
+            k+=1;
+        }
 
         return canvas;
     }
@@ -253,17 +255,16 @@ public:
 
 
 int main() {
-    //setlocale(LC_ALL, "RUS");
-    ios::sync_with_stdio(false);
+    //ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
 
     Screen screen;
     Menu menu;
-    Graphic gr;
-    Integrals in;
+    Graphic graphic;
+    Integrals integrals;
 
-    Screen::Write(in.render());
+    Screen::Write(integrals.render());
 //    Screen::Write(menu.render());
     while (true) {
 #ifdef _WIN32

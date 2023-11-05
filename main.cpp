@@ -51,13 +51,12 @@ int getch() {
 
 using namespace std;
 
-//Переменные высоты и ширины экрана
 static int SCREEN_HEIGHT;
 static int SCREEN_WIDTH;
 
 class Screen {
 public:
-    
+
     static void coinfigurateConsole() {
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -120,7 +119,7 @@ private:
 public:
     Menu() {
         canvas = Screen::generateCanvas();
-        moveMenuItemsIntoCanvas();
+        drawMenuItems();
     }
 
     vector<vector<char>> getCanvas() {
@@ -131,23 +130,25 @@ public:
     int getPoint() {
         return point;
     }
+
     void movePointDown() {
-        if(point<7) point++;
+        if (point < 7) point++;
     }
+
     void movePointUp() {
-        if(point>1) point--;
+        if (point > 1) point--;
     }
 
 private:
     void checkPointPosition() {
-        if(yStart + point != yPoint) {
+        if (yStart + point != yPoint) {
             canvas[yPoint][xPoint] = ' ';
             yPoint = yStart + point;
             canvas[yPoint][xPoint] = '*';
         }
     }
 
-    void moveMenuItemsIntoCanvas() {
+    void drawMenuItems() {
         for (int i = 0; i < menu_items.size(); i++) {
             for (int j = 0; j < menu_items[i].size(); j++) {
                 canvas[i + yStart][j + xStart] = menu_items[i][j];
@@ -164,6 +165,16 @@ private:
     const int N = 10;
     const int A = 1;
     const int B = 2;
+
+    double F1(double x) {
+        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+    }
+
+    double F2(double x) {
+        return 10 / (2 + x * x);
+    }
+
+
     const double dX = fabs(B - A) / (N - 1.0);
     size_t yStart;
     size_t xStart;
@@ -177,55 +188,88 @@ public:
         fillMenuItems();
         yStart = (SCREEN_HEIGHT - menuItems.size()) / 2;
         xStart = (SCREEN_WIDTH - menuItems[0].size()) / 2;
-        moveMenuItemsIntoCanvas();
+        drawMenuItems();
 
+        drawAnswers();
     }
-/*
-                                _____________________________________________
-                                |       i|    x[i]|       F1[i]|       F2[i]|
-                                |___________________________________________|
-                                |       1|       1|     6.54759|     3.33333|
-                                |       2| 1.11111|     8.33162|      3.0916|
-                                |       3| 1.22222|     10.5843|     2.86219|
-                                |       4| 1.33333|       13.42|     2.64706|
-                                |       5| 1.44444|     16.9813|     2.44713|
-                                |       6| 1.55556|     21.4461|     2.26257|
-                                |       7| 1.66667|     27.0362|     2.09302|
-                                |       8| 1.77778|     34.0286|      1.9378|
-                                |       9| 1.88889|     42.7689|     1.79601|
-                                |      10|       2|     53.6889|     1.66667|
-                                |___________________________________________|
 
-                                Минимальный элемент первой функции:-9.25596e+61
-                                Максимальный элемент первой функции:8.33162
-                                Минимальный элемент второй функции:-9.25596e+61
-                                Максимальный элемент второй функции:10.5843
- */
     vector<vector<char>> getCanvas() {
         return canvas;
     }
 
 private:
-    double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+    vector<vector<double>> calculateArray() {
+        vector<vector<double>> XF1F2;
+
+        XF1F2.resize(3);
+        for (auto &i: XF1F2) i.resize(N);
+
+        XF1F2[0][0] = double(A);
+        for (int i = 0; i < N; i++) {
+            if (i != 0) XF1F2[0][i] = XF1F2[0][i - 1] + dX;
+            XF1F2[1][i] = F1(XF1F2[0][i]);
+            XF1F2[2][i] = F2(XF1F2[0][i]);
+        }
+
+        return XF1F2;
     }
 
-    double F2(double x) {
-        return 10 / (2 + x * x);
+    void drawAnswers() {
+        vector<vector<double>> XF1F2 = calculateArray();
+
+        double maxF1 = findMax(XF1F2[1]);
+        double maxF2 = findMax(XF1F2[2]);
+        double minF1 = findMin(XF1F2[1]);
+        double minF2 = findMin(XF1F2[2]);
+
+        for (int i = 3; i < N + 3; i++) {
+            int k = 0;
+            for (int j = 0; j < 6; j++) {
+                canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
+                canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
+                canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
+                k++;
+            }
+        }
+
+        const string maxF1Str = "Max F1: " + to_string(maxF1);
+        const string maxF2Str = "Max F2: " + to_string(maxF2);
+        const string minF1Str = "Min F1: " + to_string(minF1);
+        const string minF2Str = "Min F2: " + to_string(minF2);
+
+        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
+        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
+        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
+        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
+
+    }
+
+    double findMax(vector<double> F) {
+        double max1 = F[0];
+        for (int i = 0; i < N; i++)
+            if (F[i] > max1)max1 = F[i];
+        return max1;
+    }
+
+    double findMin(vector<double> F) {
+        double min1 = F[0];
+        for (int i = 0; i < N; i++)
+            if (F[i] < min1)min1 = F[i];
+        return min1;
     }
 
     void fillMenuItems() {
         menuItems.push_back("_____________________________________________");
         menuItems.push_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
         menuItems.push_back("|___________________________________________|");
-        for (int i = 0; i<N; i++) {
-            if (i<9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
+        for (int i = 0; i < N; i++) {
+            if (i < 9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
             else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
         }
         menuItems.emplace_back("|___________________________________________|");
     }
 
-    void moveMenuItemsIntoCanvas() {
+    void drawMenuItems() {
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
                 canvas[i + yStart][j + xStart] = menuItems[i][j];
@@ -235,11 +279,15 @@ private:
 };
 
 class Graphic {
+
 private:
-    //Создание экрана
+    double function(double x) {
+        return sin(x);
+    }
+
+
     vector<vector<char>> canvas;
 
-    //Создание вспомогательных переменных для отрисовки графика
     const double xScale = SCREEN_WIDTH / (2 * M_PI);
     const double yScale = SCREEN_HEIGHT / 2.0;
 
@@ -255,11 +303,8 @@ public:
     }
 
 private:
-    double function(double x) {
-        return sin(x);
-    }
-    
-    void drawCoordinates(){
+
+    void drawCoordinates() {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             canvas[SCREEN_HEIGHT / 2][x] = '-';
         }
@@ -268,8 +313,8 @@ private:
         }
         canvas[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = '+';
     }
-    
-    void drawGraphic(){
+
+    void drawGraphic() {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y = static_cast<int>(round(function(radians) * yScale)) + SCREEN_HEIGHT / 2;
@@ -278,11 +323,88 @@ private:
     }
 };
 
+class Equation {
+private:
+    const int A = 0;
+    const int B = 4;
+    const double e = 0.001;
 
-class Integrals {
+    double function(double x) {
+        return pow(x, 3) + 3 * x + 2;
+    }
+
+
+    vector<vector<char>> canvas;
+    vector<string> menuItems{
+            "____________________________________________________",
+            "| Equation x^3 + 3x + 2 = 0 on the segment [0,4]   |",
+            "----------------------------------------------------",
+            "----------------------------------------------------",
+            "| Bisection method:                                |",
+            "----------------------------------------------------",
+    };
+    const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
+    const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
+
 public:
 
-    Integrals() = default;
+    Equation() {
+        canvas = Screen::generateCanvas();
+        drawMenuItems();
+        drawAnswers();
+    }
+
+    vector<vector<char>> getCanvas() {
+        return canvas;
+    }
+
+private:
+    double bisectionMethod() {
+        double a = A;
+        double b = B;
+        double x = 0;
+        while ((b - a) >= e) {
+            x = (a + b) / 2;
+            if (function(x) * function(a) < 0) b = x;
+            else a = x;
+        }
+        return x;
+    }
+
+    void drawMenuItems(){
+        for (int i = 0; i < menuItems.size(); i++) {
+            for (int j = 0; j < menuItems[i].size(); j++) {
+                canvas[i + y_start][j + x_start] = menuItems[i][j];
+            }
+        }
+    }
+
+    void drawAnswers(){
+        string answers[1];
+        answers[0] = to_string(bisectionMethod());
+        int k = 0;
+        for (int i = 4; i < menuItems.size(); i += 3) {
+            for (int j = 35; j < 41; j++) {
+                canvas[i + y_start][j + x_start] = answers[k][j - 35];
+            }
+            k += 1;
+        }
+    }
+};
+
+class Integrals {
+private:
+    const int A = 1;
+    const int B = 5;
+    const int N = 10000;
+    const double e = 0.001;
+
+    double function(double x) {
+        return cos(x) * pow(M_E, x);
+    }
+
+
+
     vector<string> menuItems{
             "--------------------------------------------",
             "| cos(x) * pow(e, x) on the segment [1,5]: |",
@@ -294,54 +416,55 @@ public:
             "| Trapeze method:                          |",
             "--------------------------------------------",
     };
+    const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
+    const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
+    const double H = fabs(B - A) / N;
+    vector<vector<char>> canvas;
 
-    vector<vector<char>> render() {
-        vector<vector<char>> canvas = Screen::generateCanvas();
+public:
+    Integrals(){
+        canvas = Screen::generateCanvas();
+        drawMenuItems();
+        drawAnswers();
+    }
 
-        size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
-        size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
+    vector<vector<char>> getCanvas() {
+        return canvas;
+    }
 
+private:
+    double trapezeMethod() {
+        double s = function(A) + function(B);
+        for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
+        return (H / 2) * s;
+    }
+
+    double rectangleMethod() {
+        double s = 0;
+        for (double x = B; x > A; x -= e) s += function(x) * e;
+        return s;
+    }
+
+    void drawMenuItems(){
         for (int i = 0; i < menuItems.size(); i++) {
 
             for (int j = 0; j < menuItems[i].size(); j++) {
                 canvas[i + y_start][j + x_start] = menuItems[i][j];
             }
         }
+    }
 
+    void drawAnswers(){
         string answers[2];
         answers[0] = to_string(trapezeMethod());
         answers[1] = to_string(rectangleMethod());
         int k = 0;
-        for (int i = 4; i < menuItems.size(); i+=3) {
+        for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {
-                canvas[i + y_start][j + x_start] = answers[k][j-35];
+                canvas[i + y_start][j + x_start] = answers[k][j - 35];
             }
-            k+=1;
+            k += 1;
         }
-
-        return canvas;
-    }
-private:
-    const int A = 1;
-    const int B = 5;
-    const int N = 10000;
-    const double H = fabs(B - A) / N;
-    const double e = 0.001;
-
-
-    double function(double x) {
-        return cos(x) * pow(M_E, x);
-    }
-
-    double trapezeMethod() {
-        double s = function(A) + function(B);
-        for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
-        return (H / 2) * s;
-    }
-    double rectangleMethod() {
-        double s = 0;
-        for (double x = B; x > A; x -= e) s += function(x) * e;
-        return s;
     }
 };
 
@@ -362,18 +485,18 @@ int main() {
             "7.  Exit     ",
      */
 
-    
+
 
     Menu menu;
 
     Table table;
     Graphic graphic;
-
+    Equation equation;
     Integrals integrals;
 
 
     Screen::render(menu.getCanvas());
-//    Screen::render(in.render());
+//    Screen::getCanvas(in.getCanvas());
     while (true) {
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
@@ -395,9 +518,10 @@ int main() {
                     Screen::render(graphic.getCanvas());
                     break;
                 case 3:
+                    Screen::render(equation.getCanvas());
                     break;
                 case 4:
-                    Screen::render(integrals.render());
+                    Screen::render(integrals.getCanvas());
                     break;
                 case 5:
                     break;

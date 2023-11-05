@@ -65,6 +65,8 @@ class Screen {
 public:
 
     static void configureConsole() {
+        ios::sync_with_stdio(false);
+        cin.tie(nullptr);
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -90,6 +92,7 @@ public:
                     cout << " ";
             cout << endl;
         }
+        Sleep(200);
     }
 
     static vector<vector<char>> generateCanvas() {
@@ -484,35 +487,88 @@ private:
 class Animation {
 
 private:
-    vector<vector<char>> canvas;
+    vector<vector<vector<char>>> frames;
 
-    const double xScale = SCREEN_WIDTH / (2 * M_PI);
-    const double yScale = SCREEN_HEIGHT / 2.0;
+    int frame = 0;
+    bool isGoing = false;
+
+    vector<vector<string>> framesStr {
+            {
+                    "  /",
+                    " / ",
+                    "/  ",
+            },
+            {
+                    "   ",
+                    "---",
+                    "   ",
+            },
+            {
+                    "\\  ",
+                    " \\ ",
+                    "  \\",
+            },
+            {
+                    " | ",
+                    " | ",
+                    " | ",
+            },
+    };
+
+    const size_t y_start = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
+    const size_t x_start = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
 
 public:
     Animation() {
-        canvas = Screen::generateCanvas();
+        frames.resize(4);
+        for (int i=0; i<frames.size(); i++) frames[i] = Screen::generateCanvas();
+        drawFrames();
+    }
+    void animate(){
+        Screen::render(getCanvas());
     }
 
-    vector<vector<char>> getCanvas() {
-        return canvas;
+
+
+    bool getIsGoing() {
+        return isGoing;
+    }
+    void setIsGoing(bool isGoing1) {
+        isGoing = isGoing1;
     }
 
 private:
-    //nothing
+
+    vector<vector<char>> getCanvas() {
+        (frame<frames.size()-1) ? frame++ : frame=0;
+        return frames[frame];
+    }
+
+    void drawFrames() {
+        for (int k = 0; k < framesStr.size(); ++k) {
+            for (int i = 0; i < framesStr[k].size(); i++) {
+                for (int j = 0; j < framesStr[k][i].size(); j++) {
+                    frames[k][i + y_start][j + x_start] = framesStr[k][i][j];
+                }
+            }
+        }
+    }
 };
 
 class Author {
 private:
     vector<string> menuItems{
             "/ \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\",
-            "RGR for programming",
-            "University: OmSTU",
-            "Faculty: FiTIKS",
-            "Group: PI-232",
-            "Zagarov Svyatoslav Alekseevich",
+            "RGR for programming                                        ",
+            "University: OmSTU                                          ",
+            "Faculty: FiTIKS                                            ",
+            "Group: PI-232                                              ",
+            "Zagarov Svyatoslav Alekseevich                             ",
             "\\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ /",
     };
+    /*
+
+     */
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
     vector<vector<char>> canvas;
@@ -530,7 +586,6 @@ public:
 private:
     void drawMenuItems() {
         for (int i = 0; i < menuItems.size(); i++) {
-
             for (int j = 0; j < menuItems[i].size(); j++) {
                 canvas[i + y_start][j + x_start] = menuItems[i][j];
             }
@@ -540,8 +595,6 @@ private:
 
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
     Screen::configureConsole();
 
     Menu menu;
@@ -554,6 +607,7 @@ int main() {
 
     Screen::render(menu.getCanvas());
     while (true) {
+        if(animation.getIsGoing()) animation.animate();
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
             menu.movePointUp();
@@ -563,6 +617,7 @@ int main() {
             Screen::render(menu.getCanvas());
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
             Screen::render(menu.getCanvas());
+            animation.setIsGoing(false);
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
             switch (menu.getPoint()) {
                 case 1:
@@ -578,7 +633,7 @@ int main() {
                     Screen::render(integrals.getCanvas());
                     break;
                 case 5:
-                    Screen::render(animation.getCanvas());
+                    animation.setIsGoing(true);
                     break;
                 case 6:
                     Screen::render(author.getCanvas());
@@ -632,6 +687,5 @@ int main() {
                 break;
         }
 #endif
-        Sleep(100);
     }
 }

@@ -75,9 +75,9 @@ public:
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
                 if (scene[i][j]) {
-                    if (scene[i][j] == ';') cout << GREEN;
-                    else if (scene[i][j] == '#') cout << MAGENTA;
-                    else if (scene[i][j] == '%') cout << RESET;
+                    if (scene[i][j] == ';') cout << GREEN << " ";
+                    else if (scene[i][j] == '#') cout << MAGENTA << " ";
+                    else if (scene[i][j] == '%') cout << RESET << " ";
                     else cout << scene[i][j];
                 } else
                     cout << " ";
@@ -133,10 +133,12 @@ public:
 
     void movePointDown() {
         if (point < 7) point++;
+        else point = 1;
     }
 
     void movePointUp() {
         if (point > 1) point--;
+        else point = 7;
     }
 
 private:
@@ -226,21 +228,27 @@ private:
             int k = 0;
             for (int j = 0; j < 6; j++) {
                 canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
+                canvas[i + yStart][21 + xStart] =
+                        (XF1F2[1][i - 3] == maxF1) ? ';' : (XF1F2[1][i - 3] == minF1) ? '#' : ' ';
                 canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
+                canvas[i + yStart][22 + 6 + xStart] = '%';
+                canvas[i + yStart][32 + xStart] =
+                        (XF1F2[2][i - 3] == maxF2) ? ';' : (XF1F2[2][i - 3] == minF2) ? '#' : ' ';
                 canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
+                canvas[i + yStart][33 + 6 + xStart] = '%';
                 k++;
             }
         }
 
-        const string maxF1Str = "Max F1: " + to_string(maxF1);
-        const string maxF2Str = "Max F2: " + to_string(maxF2);
-        const string minF1Str = "Min F1: " + to_string(minF1);
-        const string minF2Str = "Min F2: " + to_string(minF2);
+        const string maxF1Str = ";Max F1: " + to_string(maxF1) + "%";
+        const string maxF2Str = ";Max F2: " + to_string(maxF2) + "%";
+        const string minF1Str = "#Min F1: " + to_string(minF1) + "%";
+        const string minF2Str = "#Min F2: " + to_string(minF2) + "%";
 
-        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
-        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
-        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
-        for (int j = 0; j < 13; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
+        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
+        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
+        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
+        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
 
     }
 
@@ -371,7 +379,7 @@ private:
         return x;
     }
 
-    void drawMenuItems(){
+    void drawMenuItems() {
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
                 canvas[i + y_start][j + x_start] = menuItems[i][j];
@@ -379,7 +387,7 @@ private:
         }
     }
 
-    void drawAnswers(){
+    void drawAnswers() {
         string answers[1];
         answers[0] = to_string(bisectionMethod());
         int k = 0;
@@ -404,7 +412,6 @@ private:
     }
 
 
-
     vector<string> menuItems{
             "--------------------------------------------",
             "| cos(x) * pow(e, x) on the segment [1,5]: |",
@@ -422,7 +429,7 @@ private:
     vector<vector<char>> canvas;
 
 public:
-    Integrals(){
+    Integrals() {
         canvas = Screen::generateCanvas();
         drawMenuItems();
         drawAnswers();
@@ -445,7 +452,7 @@ private:
         return s;
     }
 
-    void drawMenuItems(){
+    void drawMenuItems() {
         for (int i = 0; i < menuItems.size(); i++) {
 
             for (int j = 0; j < menuItems[i].size(); j++) {
@@ -454,7 +461,7 @@ private:
         }
     }
 
-    void drawAnswers(){
+    void drawAnswers() {
         string answers[2];
         answers[0] = to_string(trapezeMethod());
         answers[1] = to_string(rectangleMethod());
@@ -468,35 +475,79 @@ private:
     }
 };
 
+class Animation {
+
+private:
+    vector<vector<char>> canvas;
+
+    const double xScale = SCREEN_WIDTH / (2 * M_PI);
+    const double yScale = SCREEN_HEIGHT / 2.0;
+
+public:
+    Animation() {
+        canvas = Screen::generateCanvas();
+    }
+
+    vector<vector<char>> getCanvas() {
+        return canvas;
+    }
+
+private:
+    //nothing
+};
+
+class Author {
+private:
+    vector<string> menuItems{
+            "/ \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\",
+            "RGR for programming",
+            "University: OmSTU",
+            "Faculty: FiTIKS",
+            "Group: PI-232",
+            "Zagarov Svyatoslav Alekseevich",
+            "\\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ /",
+    };
+    const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
+    const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
+    vector<vector<char>> canvas;
+
+public:
+    Author() {
+        canvas = Screen::generateCanvas();
+        drawMenuItems();
+    }
+
+    vector<vector<char>> getCanvas() {
+        return canvas;
+    }
+
+private:
+    void drawMenuItems() {
+        for (int i = 0; i < menuItems.size(); i++) {
+
+            for (int j = 0; j < menuItems[i].size(); j++) {
+                canvas[i + y_start][j + x_start] = menuItems[i][j];
+            }
+        }
+    }
+};
+
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     Screen::coinfigurateConsole();
 
-    /*
-     "Menu",
-            "1.  Table    ",
-            "2.  Graphics ",
-            "3.  Equation ",
-            "4.  Integrals",
-            "5.  Animation",
-            "6.  Author   ",
-            "7.  Exit     ",
-     */
-
-
-
     Menu menu;
-
     Table table;
     Graphic graphic;
     Equation equation;
     Integrals integrals;
+    Animation animation;
+    Author author;
 
 
     Screen::render(menu.getCanvas());
-//    Screen::getCanvas(in.getCanvas());
     while (true) {
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
@@ -508,7 +559,6 @@ int main() {
 
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
             Screen::render(menu.getCanvas());
-            break;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
             switch (menu.getPoint()) {
                 case 1:
@@ -524,8 +574,10 @@ int main() {
                     Screen::render(integrals.getCanvas());
                     break;
                 case 5:
+                    Screen::render(animation.getCanvas());
                     break;
                 case 6:
+                    Screen::render(author.getCanvas());
                     break;
                 case 7:
                     exit(1);

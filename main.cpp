@@ -170,17 +170,13 @@ private:
 };
 
 class Table {
-
-
 private:
-    const int N = 10;
-    const int A = 1;
-    const int B = 2;
-
+    const int N = 12;
+    const int A = 2;
+    const int B = 4;
     double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
     }
-
     double F2(double x) {
         return 10 / (2 + x * x);
     }
@@ -348,13 +344,9 @@ private:
     const int A = 0;
     const int B = 4;
     const double e = 0.001;
-
     double function(double x) {
         return pow(x, 3) + 3 * x + 2;
     }
-
-
-    vector<vector<char>> canvas;
     vector<string> menuItems{
             "____________________________________________________",
             "| Equation x^3 + 3x + 2 = 0 on the segment [0,4]   |",
@@ -363,6 +355,10 @@ private:
             "| Bisection method:                                |",
             "----------------------------------------------------",
     };
+
+
+
+    vector<vector<char>> canvas;
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
 
@@ -418,12 +414,9 @@ private:
     const int B = 5;
     const int N = 10000;
     const double e = 0.001;
-
     double function(double x) {
         return cos(x) * pow(M_E, x);
     }
-
-
     vector<string> menuItems{
             "--------------------------------------------",
             "| cos(x) * pow(e, x) on the segment [1,5]: |",
@@ -435,6 +428,8 @@ private:
             "| Trapeze method:                          |",
             "--------------------------------------------",
     };
+
+
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
     const double H = fabs(B - A) / N;
@@ -497,24 +492,24 @@ private:
 
     vector<vector<string>> framesStr {
             {
-                    "  /",
-                    " / ",
-                    "/  ",
+                    "_____",
+                    "|   |",
+                    "|   |",
             },
             {
-                    "   ",
-                    "---",
-                    "   ",
+                    "|  /|",
+                    "| / |",
+                    "|/  |",
             },
             {
-                    "\\  ",
-                    " \\ ",
-                    "  \\",
+                    " ___ ",
+                    "_|_|_",
+                    "\\   /",
             },
             {
-                    " | ",
-                    " | ",
-                    " | ",
+                    "|--| ",
+                    "|__| ",
+                    "|    ",
             },
     };
 
@@ -529,6 +524,7 @@ public:
     }
     void animate(){
         Screen::render(getCanvas());
+        Sleep(150);
     }
 
 

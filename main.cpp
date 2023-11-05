@@ -92,7 +92,6 @@ public:
         }
     }
 
-    //Функция создания пустого экрана
     static vector<vector<char>> generateCanvas() {
         vector<vector<char>> canvas;
         canvas.resize(SCREEN_HEIGHT);
@@ -553,7 +552,6 @@ int main() {
     Animation animation;
     Author author;
 
-
     Screen::render(menu.getCanvas());
     while (true) {
 #ifdef _WIN32
@@ -563,7 +561,6 @@ int main() {
         } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
             menu.movePointDown();
             Screen::render(menu.getCanvas());
-
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
             Screen::render(menu.getCanvas());
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
@@ -592,39 +589,49 @@ int main() {
                     break;
             }
         }
-        Sleep(100);
 #else
         char input = getch();
         switch (input) {
-            case 49: // 1
-                menu.point = 1;
-                break;
-            case 50: // 2
-                menu.point = 2;
-                break;
-            case 51: // 3
-                menu.point = 3;
-                break;
-            case 52: // 4
-                menu.point = 4;
-                break;
-            case 53: // 5
-                menu.point = 5;
-                break;
             case 65: // up
-                if (menu.point < (menu.menuItems.size() - 1)) menu.point ++;
+                menu.movePointUp();
+                Screen::render(menu.getCanvas());
                 break;
             case 66: // down
-                if (menu.point > 1) menu.point --;
+                menu.movePointDown();
+                Screen::render(menu.getCanvas());
                 break;
             case 13: // enter
+            switch (menu.getPoint()) {
+                case 1:
+                    Screen::render(table.getCanvas());
+                    break;
+                case 2:
+                    Screen::render(graphic.getCanvas());
+                    break;
+                case 3:
+                    Screen::render(equation.getCanvas());
+                    break;
+                case 4:
+                    Screen::render(integrals.getCanvas());
+                    break;
+                case 5:
+                    Screen::render(animation.getCanvas());
+                    break;
+                case 6:
+                    Screen::render(author.getCanvas());
+                    break;
+                case 7:
+                    exit(1);
+                default:
+                    break;
+            }
                 break;
             case 27: // esc
-                cout << CLEAR;
-//                exit(1);
+                Screen::render(menu.getCanvas());
             default:
                 break;
         }
 #endif
+        Sleep(100);
     }
 }

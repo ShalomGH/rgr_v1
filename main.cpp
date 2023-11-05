@@ -562,7 +562,7 @@ private:
             "University: OmSTU                                          ",
             "Faculty: FiTIKS                                            ",
             "Group: PI-232                                              ",
-            "Zagarov Svyatoslav Alekseevich                             ",
+            "kizyakin kizyak kizyakovich                                ",
             "\\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ /",
     };
     /*

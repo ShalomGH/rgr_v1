@@ -174,9 +174,11 @@ private:
     const int N = 12;
     const int A = 2;
     const int B = 4;
+
     double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
     }
+
     double F2(double x) {
         return 10 / (2 + x * x);
     }
@@ -250,13 +252,13 @@ private:
         const string minF1Str = "Min F1: " + to_string(minF1);
         const string minF2Str = "Min F2: " + to_string(minF2);
 
-        canvas[yStart + 3 + N + 2 + 0][xStart-1] = Color::GREEN;
+        canvas[yStart + 3 + N + 2 + 0][xStart - 1] = Color::GREEN;
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
-        canvas[yStart + 3 + N + 2 + 2][xStart-1] = Color::MAGENTA;
+        canvas[yStart + 3 + N + 2 + 2][xStart - 1] = Color::MAGENTA;
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
-        canvas[yStart + 3 + N + 2 + 4][xStart-1] = Color::RESET;
+        canvas[yStart + 3 + N + 2 + 4][xStart - 1] = Color::RESET;
 
     }
 
@@ -306,6 +308,7 @@ private:
 
     const double xScale = SCREEN_WIDTH / (2 * M_PI);
     const double yScale = SCREEN_HEIGHT / 2.0;
+    const int scale = 1;
 
 public:
     Graphic() {
@@ -344,9 +347,11 @@ private:
     const int A = 0;
     const int B = 4;
     const double e = 0.001;
+
     double function(double x) {
         return pow(x, 3) + 3 * x + 2;
     }
+
     vector<string> menuItems{
             "____________________________________________________",
             "| Equation x^3 + 3x + 2 = 0 on the segment [0,4]   |",
@@ -355,7 +360,6 @@ private:
             "| Bisection method:                                |",
             "----------------------------------------------------",
     };
-
 
 
     vector<vector<char>> canvas;
@@ -414,9 +418,11 @@ private:
     const int B = 5;
     const int N = 10000;
     const double e = 0.001;
+
     double function(double x) {
         return cos(x) * pow(M_E, x);
     }
+
     vector<string> menuItems{
             "--------------------------------------------",
             "| cos(x) * pow(e, x) on the segment [1,5]: |",
@@ -490,7 +496,7 @@ private:
     int frame = 0;
     bool isGoing = false;
 
-    vector<vector<string>> framesStr {
+    vector<vector<string>> framesStr{
             {
                     "_____",
                     "|   |",
@@ -519,19 +525,20 @@ private:
 public:
     Animation() {
         frames.resize(4);
-        for (int i=0; i<frames.size(); i++) frames[i] = Screen::generateCanvas();
+        for (int i = 0; i < frames.size(); i++) frames[i] = Screen::generateCanvas();
         drawFrames();
     }
-    void animate(){
+
+    void animate() {
         Screen::render(getCanvas());
         Sleep(150);
     }
 
 
-
     bool getIsGoing() {
         return isGoing;
     }
+
     void setIsGoing(bool isGoing1) {
         isGoing = isGoing1;
     }
@@ -539,7 +546,7 @@ public:
 private:
 
     vector<vector<char>> getCanvas() {
-        (frame<frames.size()-1) ? frame++ : frame=0;
+        (frame < frames.size() - 1) ? frame++ : frame = 0;
         return frames[frame];
     }
 
@@ -606,7 +613,7 @@ int main() {
 
     Screen::render(menu.getCanvas());
     while (true) {
-        if(animation.getIsGoing()) animation.animate();
+        if (animation.getIsGoing()) animation.animate();
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
             menu.movePointUp();

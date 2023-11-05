@@ -5,24 +5,24 @@
 
 #define USE_MATH_DEFINES
 
-#define RESET   "\033[0m"
-//#define BLACK   "\033[30m"      /* Black */
-//#define RED     "\033[31m"      /* Red */
-#define GREEN   "\033[32m"      /* Green */
-//#define YELLOW  "\033[33m"      /* Yellow */
-//#define BLUE    "\033[34m"      /* Blue */
-#define MAGENTA "\033[35m"      /* Magenta */
-//#define CYAN    "\033[36m"      /* Cyan */
-//#define WHITE   "\033[37m"      /* White */
-//#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
-//#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
-//#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
-//#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
-//#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
-//#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
-//#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
-//#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
-#define CLEAR u8"\033[2J\033[1;1H" /* clear console */
+#define RESET_CODE   "\033[0m"
+//#define BLACK_CODE   "\033[30m"      /* Black */
+//#define RED_CODE     "\033[31m"      /* Red */
+#define GREEN_CODE   "\033[32m"      /* Green */
+//#define YELLOW_CODE  "\033[33m"      /* Yellow */
+//#define BLUE_CODE    "\033[34m"      /* Blue */
+#define MAGENTA_CODE "\033[35m"      /* Magenta */
+//#define CYAN_CODE    "\033[36m"      /* Cyan */
+//#define WHITE_CODE   "\033[37m"      /* White */
+//#define BOLDBLACK_CODE   "\033[1m\033[30m"      /* Bold Black */
+//#define BOLDRED_CODE     "\033[1m\033[31m"      /* Bold Red */
+//#define BOLDGREEN_CODE   "\033[1m\033[32m"      /* Bold Green */
+//#define BOLDYELLOW_CODE  "\033[1m\033[33m"      /* Bold Yellow */
+//#define BOLDBLUE_CODE    "\033[1m\033[34m"      /* Bold Blue */
+//#define BOLDMAGENTA_CODE "\033[1m\033[35m"      /* Bold Magenta */
+//#define BOLDCYAN_CODE    "\033[1m\033[36m"      /* Bold Cyan */
+//#define BOLDWHITE_CODE   "\033[1m\033[37m"      /* Bold White */
+#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 
 #ifdef _WIN32
@@ -54,10 +54,17 @@ using namespace std;
 static int SCREEN_HEIGHT;
 static int SCREEN_WIDTH;
 
+class Color {
+public:
+    static const char GREEN = ';';
+    static const char MAGENTA = '?';
+    static const char RESET = '%';
+};
+
 class Screen {
 public:
 
-    static void coinfigurateConsole() {
+    static void configureConsole() {
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -75,9 +82,9 @@ public:
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
                 if (scene[i][j]) {
-                    if (scene[i][j] == ';') cout << GREEN << " ";
-                    else if (scene[i][j] == '#') cout << MAGENTA << " ";
-                    else if (scene[i][j] == '%') cout << RESET << " ";
+                    if (scene[i][j] == Color::GREEN) cout << GREEN_CODE << " ";
+                    else if (scene[i][j] == Color::MAGENTA) cout << MAGENTA_CODE << " ";
+                    else if (scene[i][j] == Color::RESET) cout << RESET_CODE << " ";
                     else cout << scene[i][j];
                 } else
                     cout << " ";
@@ -229,21 +236,21 @@ private:
             for (int j = 0; j < 6; j++) {
                 canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
                 canvas[i + yStart][21 + xStart] =
-                        (XF1F2[1][i - 3] == maxF1) ? ';' : (XF1F2[1][i - 3] == minF1) ? '#' : ' ';
+                        (XF1F2[1][i - 3] == maxF1) ? Color::GREEN : (XF1F2[1][i - 3] == minF1) ? Color::MAGENTA : ' ';
                 canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
-                canvas[i + yStart][22 + 6 + xStart] = '%';
+                canvas[i + yStart][22 + 6 + xStart] = Color::RESET;
                 canvas[i + yStart][32 + xStart] =
-                        (XF1F2[2][i - 3] == maxF2) ? ';' : (XF1F2[2][i - 3] == minF2) ? '#' : ' ';
+                        (XF1F2[2][i - 3] == maxF2) ? Color::GREEN : (XF1F2[2][i - 3] == minF2) ? Color::MAGENTA : ' ';
                 canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
-                canvas[i + yStart][33 + 6 + xStart] = '%';
+                canvas[i + yStart][33 + 6 + xStart] = Color::RESET;
                 k++;
             }
         }
 
-        const string maxF1Str = ";Max F1: " + to_string(maxF1) + "%";
-        const string maxF2Str = ";Max F2: " + to_string(maxF2) + "%";
-        const string minF1Str = "#Min F1: " + to_string(minF1) + "%";
-        const string minF2Str = "#Min F2: " + to_string(minF2) + "%";
+        const string maxF1Str = to_string(Color::GREEN) + "Max F1: " + to_string(maxF1) + to_string(Color::RESET);
+        const string maxF2Str = to_string(Color::GREEN) + "Max F2: " + to_string(maxF2) + to_string(Color::RESET);;
+        const string minF1Str = to_string(Color::MAGENTA) + "Min F1: " + to_string(minF1) + to_string(Color::RESET);;
+        const string minF2Str = to_string(Color::MAGENTA) + "Min F2: " + to_string(minF2) + to_string(Color::RESET);;
 
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
@@ -536,7 +543,7 @@ private:
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-    Screen::coinfigurateConsole();
+    Screen::configureConsole();
 
     Menu menu;
     Table table;

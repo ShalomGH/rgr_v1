@@ -249,15 +249,18 @@ private:
             }
         }
 
-        const string maxF1Str = to_string(Color::GREEN) + "Max F1: " + to_string(maxF1) + to_string(Color::RESET);
-        const string maxF2Str = to_string(Color::GREEN) + "Max F2: " + to_string(maxF2) + to_string(Color::RESET);;
-        const string minF1Str = to_string(Color::MAGENTA) + "Min F1: " + to_string(minF1) + to_string(Color::RESET);;
-        const string minF2Str = to_string(Color::MAGENTA) + "Min F2: " + to_string(minF2) + to_string(Color::RESET);;
+        const string maxF1Str = "Max F1: " + to_string(maxF1);
+        const string maxF2Str = "Max F2: " + to_string(maxF2);
+        const string minF1Str = "Min F1: " + to_string(minF1);
+        const string minF2Str = "Min F2: " + to_string(minF2);
 
+        canvas[yStart + 3 + N + 2 + 0][xStart-1] = Color::GREEN;
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
+        canvas[yStart + 3 + N + 2 + 2][xStart-1] = Color::MAGENTA;
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
+        canvas[yStart + 3 + N + 2 + 4][xStart-1] = Color::RESET;
 
     }
 

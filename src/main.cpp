@@ -51,6 +51,7 @@ int getch() {
 
 using namespace std;
 
+
 static int SCREEN_HEIGHT;
 static int SCREEN_WIDTH;
 
@@ -61,33 +62,70 @@ public:
     static const char RESET = '%';
 };
 
-class Screen {
-public:
 
-    static void configureConsole() {
-        ios::sync_with_stdio(false);
-        cin.tie(nullptr);
+class Buttons {
+public:
+    enum Keys {
+        NOTHING = 0,
+        ARROW_UP,
+        ARROW_DOWN,
+        ENTER,
+        ESC,
+    };
+
+    static int getKeyCode() {
 #ifdef _WIN32
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
-        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
+        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
+            return ARROW_UP;
+        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
+            return ARROW_DOWN;
+        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+            return ESC;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
+            return ENTER;
+        }
 #else
-        struct winsize size{};
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-        SCREEN_HEIGHT = size.ws_row;
-        SCREEN_WIDTH = size.ws_col;
+        char input = getch();
+        switch (input) {
+            case 65: // up
+                return ARROW_UP;
+                break;
+            case 66: // down
+                return ARROW_DOWN;
+                break;
+            case 13: // enter
+                return ENTER;
+                break;
+            case 27: //esc
+                return ESC;
+            default:
+                break;
 #endif
+        return NOTHING;
+    }
+};
+
+
+class Screen {
+protected:
+    vector<vector<char>> canvas;
+
+
+public:
+    Screen() {
+        canvas = generateCanvas(canvas);
     }
 
-    static void render(vector<vector<char>> scene) {
+    virtual void render() {}
+
+    virtual void update() {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
-                if (scene[i][j]) {
-                    if (scene[i][j] == Color::GREEN) cout << GREEN_CODE << " ";
-                    else if (scene[i][j] == Color::MAGENTA) cout << MAGENTA_CODE << " ";
-                    else if (scene[i][j] == Color::RESET) cout << RESET_CODE << " ";
-                    else cout << scene[i][j];
+                if (canvas[i][j]) {
+                    if (canvas[i][j] == Color::GREEN) cout << GREEN_CODE << " ";
+                    else if (canvas[i][j] == Color::MAGENTA) cout << MAGENTA_CODE << " ";
+                    else if (canvas[i][j] == Color::RESET) cout << RESET_CODE << " ";
+                    else cout << canvas[i][j];
                 } else
                     cout << " ";
             cout << endl;
@@ -95,16 +133,16 @@ public:
         Sleep(200);
     }
 
-    static vector<vector<char>> generateCanvas() {
-        vector<vector<char>> canvas;
-        canvas.resize(SCREEN_HEIGHT);
-        for (auto &i: canvas) i.resize(SCREEN_WIDTH);
-        return canvas;
+protected:
+
+    vector<vector<char>> generateCanvas(vector<vector<char>> canvas1) {
+        canvas1.resize(SCREEN_HEIGHT);
+        for (auto &i: canvas1) i.resize(SCREEN_WIDTH);
+        return canvas1;
     }
 };
 
-
-class Menu {
+class Menu : public Screen {
 private:
     int point = 1;
     const vector<string> menu_items{
@@ -117,7 +155,6 @@ private:
             "6.  Author   ",
             "7.  Exit     ",
     };
-    vector<vector<char>> canvas;
 
     const size_t yStart = (SCREEN_HEIGHT - menu_items.size()) / 2;
     const size_t xStart = (SCREEN_WIDTH - menu_items[1].size()) / 2;
@@ -127,19 +164,29 @@ private:
 
 public:
     Menu() {
-        canvas = Screen::generateCanvas();
         drawMenuItems();
     }
 
-    vector<vector<char>> getCanvas() {
+    void render() {
         checkPointPosition();
-        return canvas;
+        Screen::update();
+        while (true) {
+            switch (Buttons::getKeyCode()) {
+                case (Buttons::Keys::ARROW_DOWN):
+                    movePointDown();
+                    break;
+                case (Buttons::Keys::ARROW_UP):
+                    movePointUp();
+                    break;
+                case (Buttons::Keys::ENTER):
+
+                    break;
+
+            }
+        }
     }
 
-    int getPoint() {
-        return point;
-    }
-
+private:
     void movePointDown() {
         if (point < 7) point++;
         else point = 1;
@@ -150,7 +197,6 @@ public:
         else point = 7;
     }
 
-private:
     void checkPointPosition() {
         if (yStart + point != yPoint) {
             canvas[yPoint][xPoint] = ' ';
@@ -169,7 +215,7 @@ private:
     }
 };
 
-class Table {
+class Table : public Screen {
 private:
     const int N = 12;
     const int A = 2;
@@ -187,23 +233,16 @@ private:
     const double dX = fabs(B - A) / (N - 1.0);
     size_t yStart;
     size_t xStart;
-    vector<vector<char>> canvas;
     vector<string> menuItems;
 
 public:
     Table() {
-        canvas = Screen::generateCanvas();
-
         fillMenuItems();
         yStart = (SCREEN_HEIGHT - menuItems.size()) / 2;
         xStart = (SCREEN_WIDTH - menuItems[0].size()) / 2;
         drawMenuItems();
 
         drawAnswers();
-    }
-
-    vector<vector<char>> getCanvas() {
-        return canvas;
     }
 
 private:
@@ -259,7 +298,6 @@ private:
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
         for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
         canvas[yStart + 3 + N + 2 + 4][xStart - 1] = Color::RESET;
-
     }
 
     double findMax(vector<double> F) {
@@ -296,23 +334,18 @@ private:
     }
 };
 
-class Graphic {
+class Graphic : public Screen {
 
 private:
     double function(double x) {
         return sin(x);
     }
 
-
-    vector<vector<char>> canvas;
-
     const double xScale = SCREEN_WIDTH / (2 * M_PI);
     const double yScale = SCREEN_HEIGHT / 2.0;
-    const int scale = 1;
 
 public:
     Graphic() {
-        canvas = Screen::generateCanvas();
         drawCoordinates();
         drawGraphic();
     }
@@ -342,7 +375,7 @@ private:
     }
 };
 
-class Equation {
+class Equation : public Screen {
 private:
     const int A = 0;
     const int B = 4;
@@ -362,20 +395,13 @@ private:
     };
 
 
-    vector<vector<char>> canvas;
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
 
 public:
-
     Equation() {
-        canvas = Screen::generateCanvas();
         drawMenuItems();
         drawAnswers();
-    }
-
-    vector<vector<char>> getCanvas() {
-        return canvas;
     }
 
 private:
@@ -412,7 +438,7 @@ private:
     }
 };
 
-class Integrals {
+class Integrals : public Screen {
 private:
     const int A = 1;
     const int B = 5;
@@ -439,17 +465,11 @@ private:
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
     const double H = fabs(B - A) / N;
-    vector<vector<char>> canvas;
 
 public:
     Integrals() {
-        canvas = Screen::generateCanvas();
         drawMenuItems();
         drawAnswers();
-    }
-
-    vector<vector<char>> getCanvas() {
-        return canvas;
     }
 
 private:
@@ -488,34 +508,41 @@ private:
     }
 };
 
-class Animation {
+class Animation : public Screen {
 
 private:
-    vector<vector<vector<char>>> frames;
+    const int delay = 150;
 
+
+    vector<vector<vector<char>>> frames;
     int frame = 0;
     bool isGoing = false;
 
     vector<vector<string>> framesStr{
             {
-                    "  |  ",
-                    "  |  ",
-                    "()|()",
+                    "  |    |  ",
+                    "  |    |  ",
+                    "()|()()|()",
             },
             {
-                    "     ",
-                    "  |  ",
-                    "()|()",
+                    "          ",
+                    "  |    |  ",
+                    "()|()()|()",
             },
             {
-                    "     ",
-                    "     ",
-                    "()|()",
+                    "          ",
+                    "          ",
+                    "()|()()|()",
             },
             {
-                    "     ",
-                    "  |  ",
-                    "()|()",
+                    "          ",
+                    "  |    |  ",
+                    "()|()()|()",
+            },
+            {
+                    "          ",
+                    "  |    |  ",
+                    "()|()()|()",
             },
     };
 
@@ -524,16 +551,16 @@ private:
 
 public:
     Animation() {
-        frames.resize(4);
-        for (int i = 0; i < frames.size(); i++) frames[i] = Screen::generateCanvas();
+        frames.resize(framesStr.size());
+        for (int i = 0; i < frames.size(); i++) frames[i] = generateCanvas(frames[i]);
         drawFrames();
     }
 
-    void animate() {
-        Screen::render(getCanvas());
-        Sleep(150);
+    void update() {
+        canvas = getFrame();
+        Screen::update();
+        Sleep(delay);
     }
-
 
     bool getIsGoing() {
         return isGoing;
@@ -545,7 +572,7 @@ public:
 
 private:
 
-    vector<vector<char>> getCanvas() {
+    vector<vector<char>> getFrame() {
         (frame < frames.size() - 1) ? frame++ : frame = 0;
         return frames[frame];
     }
@@ -561,7 +588,7 @@ private:
     }
 };
 
-class Author {
+class Author : public Screen {
 private:
     vector<string> menuItems{
             "/ \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\",
@@ -577,16 +604,10 @@ private:
      */
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
-    vector<vector<char>> canvas;
 
 public:
     Author() {
-        canvas = Screen::generateCanvas();
         drawMenuItems();
-    }
-
-    vector<vector<char>> getCanvas() {
-        return canvas;
     }
 
 private:
@@ -599,99 +620,44 @@ private:
     }
 };
 
+class App {
+    pri
+public:
+    static const Menu menu;
+    static const Table table;
+    static const Graphic graphic;
+    static const Equation equation;
+    static const Integrals integrals;
+    static const Animation animation;
+    static const Author author;
 
-int main() {
-    Screen::configureConsole();
+    App() {
+        configure();
+    }
 
-    Menu menu;
-    Table table;
-    Graphic graphic;
-    Equation equation;
-    Integrals integrals;
-    Animation animation;
-    Author author;
+    void setScreen(Screen screen) {
+        screen.render();
+    }
 
-    Screen::render(menu.getCanvas());
-    while (true) {
-        if (animation.getIsGoing()) animation.animate();
+private:
+    void configure() {
+        ios::sync_with_stdio(false);
+        cin.tie(nullptr);
 #ifdef _WIN32
-        if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
-            menu.movePointUp();
-            Screen::render(menu.getCanvas());
-        } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
-            menu.movePointDown();
-            Screen::render(menu.getCanvas());
-        } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
-            Screen::render(menu.getCanvas());
-            animation.setIsGoing(false);
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
-            switch (menu.getPoint()) {
-                case 1:
-                    Screen::render(table.getCanvas());
-                    break;
-                case 2:
-                    Screen::render(graphic.getCanvas());
-                    break;
-                case 3:
-                    Screen::render(equation.getCanvas());
-                    break;
-                case 4:
-                    Screen::render(integrals.getCanvas());
-                    break;
-                case 5:
-                    animation.setIsGoing(true);
-                    break;
-                case 6:
-                    Screen::render(author.getCanvas());
-                    break;
-                case 7:
-                    exit(1);
-                default:
-                    break;
-            }
-        }
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
+        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
 #else
-        char input = getch();
-        switch (input) {
-            case 65: // up
-                menu.movePointUp();
-                Screen::render(menu.getCanvas());
-                break;
-            case 66: // down
-                menu.movePointDown();
-                Screen::render(menu.getCanvas());
-                break;
-            case 13: // enter
-            switch (menu.getPoint()) {
-                case 1:
-                    Screen::render(table.getCanvas());
-                    break;
-                case 2:
-                    Screen::render(graphic.getCanvas());
-                    break;
-                case 3:
-                    Screen::render(equation.getCanvas());
-                    break;
-                case 4:
-                    Screen::render(integrals.getCanvas());
-                    break;
-                case 5:
-                    Screen::render(animation.getCanvas());
-                    break;
-                case 6:
-                    Screen::render(author.getCanvas());
-                    break;
-                case 7:
-                    exit(1);
-                default:
-                    break;
-            }
-                break;
-            case 27: // esc
-                Screen::render(menu.getCanvas());
-            default:
-                break;
-        }
+        struct winsize size{};
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+        SCREEN_HEIGHT = size.ws_row;
+        SCREEN_WIDTH = size.ws_col;
 #endif
     }
+};
+
+int main() {
+    App app;
+    app.setScreen(App::menu);
 }

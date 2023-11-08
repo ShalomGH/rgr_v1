@@ -621,7 +621,6 @@ private:
 };
 
 class App {
-    pri
 public:
     static const Menu menu;
     static const Table table;

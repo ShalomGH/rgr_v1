@@ -3,26 +3,10 @@
 #include <vector>
 #include <cmath>
 
-#define USE_MATH_DEFINES
 
 #define RESET_CODE   "\033[0m"
-//#define BLACK_CODE   "\033[30m"      /* Black */
-//#define RED_CODE     "\033[31m"      /* Red */
 #define GREEN_CODE   "\033[32m"      /* Green */
-//#define YELLOW_CODE  "\033[33m"      /* Yellow */
-//#define BLUE_CODE    "\033[34m"      /* Blue */
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
-//#define CYAN_CODE    "\033[36m"      /* Cyan */
-//#define WHITE_CODE   "\033[37m"      /* White */
-//#define BOLDBLACK_CODE   "\033[1m\033[30m"      /* Bold Black */
-//#define BOLDRED_CODE     "\033[1m\033[31m"      /* Bold Red */
-//#define BOLDGREEN_CODE   "\033[1m\033[32m"      /* Bold Green */
-//#define BOLDYELLOW_CODE  "\033[1m\033[33m"      /* Bold Yellow */
-//#define BOLDBLUE_CODE    "\033[1m\033[34m"      /* Bold Blue */
-//#define BOLDMAGENTA_CODE "\033[1m\033[35m"      /* Bold Magenta */
-//#define BOLDCYAN_CODE    "\033[1m\033[36m"      /* Bold Cyan */
-//#define BOLDWHITE_CODE   "\033[1m\033[37m"      /* Bold White */
-#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 
 #ifdef _WIN32
@@ -130,12 +114,11 @@ public:
                     cout << " ";
             cout << endl;
         }
-        Sleep(200);
     }
 
 protected:
 
-    vector<vector<char>> generateCanvas(vector<vector<char>> canvas1) {
+    static vector<vector<char>> generateCanvas(vector<vector<char>> canvas1) {
         canvas1.resize(SCREEN_HEIGHT);
         for (auto &i: canvas1) i.resize(SCREEN_WIDTH);
         return canvas1;
@@ -167,7 +150,7 @@ public:
         drawMenuItems();
     }
 
-    void render() {
+    void render() override {
         checkPointPosition();
         Screen::update();
         while (true) {
@@ -181,7 +164,6 @@ public:
                 case (Buttons::Keys::ENTER):
 
                     break;
-
             }
         }
     }
@@ -221,11 +203,11 @@ private:
     const int A = 2;
     const int B = 4;
 
-    double F1(double x) {
+    static double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
     }
 
-    double F2(double x) {
+    static double F2(double x) {
         return 10 / (2 + x * x);
     }
 
@@ -246,7 +228,7 @@ public:
     }
 
 private:
-    vector<vector<double>> calculateArray() {
+    [[nodiscard]] vector<vector<double>> calculateArray() const {
         vector<vector<double>> XF1F2;
 
         XF1F2.resize(3);
@@ -300,14 +282,14 @@ private:
         canvas[yStart + 3 + N + 2 + 4][xStart - 1] = Color::RESET;
     }
 
-    double findMax(vector<double> F) {
+    [[nodiscard]] double findMax(vector<double> F) const {
         double max1 = F[0];
         for (int i = 0; i < N; i++)
             if (F[i] > max1)max1 = F[i];
         return max1;
     }
 
-    double findMin(vector<double> F) {
+    [[nodiscard]] double findMin(vector<double> F) const {
         double min1 = F[0];
         for (int i = 0; i < N; i++)
             if (F[i] < min1)min1 = F[i];
@@ -315,9 +297,9 @@ private:
     }
 
     void fillMenuItems() {
-        menuItems.push_back("_____________________________________________");
-        menuItems.push_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
-        menuItems.push_back("|___________________________________________|");
+        menuItems.emplace_back("_____________________________________________");
+        menuItems.emplace_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
+        menuItems.emplace_back("|___________________________________________|");
         for (int i = 0; i < N; i++) {
             if (i < 9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
             else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
@@ -337,7 +319,7 @@ private:
 class Graphic : public Screen {
 
 private:
-    double function(double x) {
+    static double function(double x) {
         return sin(x);
     }
 
@@ -348,10 +330,6 @@ public:
     Graphic() {
         drawCoordinates();
         drawGraphic();
-    }
-
-    vector<vector<char>> getCanvas() {
-        return canvas;
     }
 
 private:
@@ -381,7 +359,7 @@ private:
     const int B = 4;
     const double e = 0.001;
 
-    double function(double x) {
+    static double function(double x) {
         return pow(x, 3) + 3 * x + 2;
     }
 
@@ -405,7 +383,7 @@ public:
     }
 
 private:
-    double bisectionMethod() {
+    [[nodiscard]] double bisectionMethod() const {
         double a = A;
         double b = B;
         double x = 0;
@@ -445,7 +423,7 @@ private:
     const int N = 10000;
     const double e = 0.001;
 
-    double function(double x) {
+    static double function(double x) {
         return cos(x) * pow(M_E, x);
     }
 
@@ -473,13 +451,13 @@ public:
     }
 
 private:
-    double trapezeMethod() {
+    [[nodiscard]] double trapezeMethod() const {
         double s = function(A) + function(B);
         for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
         return (H / 2) * s;
     }
 
-    double rectangleMethod() {
+    [[nodiscard]] double rectangleMethod() const {
         double s = 0;
         for (double x = B; x > A; x -= e) s += function(x) * e;
         return s;
@@ -556,18 +534,10 @@ public:
         drawFrames();
     }
 
-    void update() {
+    void update() override {
         canvas = getFrame();
         Screen::update();
         Sleep(delay);
-    }
-
-    bool getIsGoing() {
-        return isGoing;
-    }
-
-    void setIsGoing(bool isGoing1) {
-        isGoing = isGoing1;
     }
 
 private:
@@ -591,17 +561,17 @@ private:
 class Author : public Screen {
 private:
     vector<string> menuItems{
-            "/ \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\",
+            R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \)",
             "RGR for programming                                        ",
             "University: OmSTU                                          ",
             "Faculty: FiTIKS                                            ",
             "Group: PI-232                                              ",
             "kizyakin kizyak kizyakovich                                ",
-            "\\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\ /",
+            R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /)",
     };
-    /*
 
-     */
+
+
     const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
     const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
 
@@ -634,12 +604,12 @@ public:
         configure();
     }
 
-    void setScreen(Screen screen) {
+    static void setScreen(Screen screen) {
         screen.render();
     }
 
 private:
-    void configure() {
+    static void configure() {
         ios::sync_with_stdio(false);
         cin.tie(nullptr);
 #ifdef _WIN32
@@ -658,5 +628,5 @@ private:
 
 int main() {
     App app;
-    app.setScreen(App::menu);
+    App::setScreen(App::menu);
 }

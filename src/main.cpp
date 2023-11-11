@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <ctime>
 
 
 #define RESET_CODE   "\033[0m"
@@ -46,6 +47,8 @@ public:
     static const char RESET = '%';
 };
 
+static int previousTime = 0;
+static const int baseDelay = 1;
 
 class Buttons {
 public:
@@ -58,29 +61,39 @@ public:
     };
 
     static int getKeyCode() {
+        time_t now = time(0);
+        if (previousTime + baseDelay > now) return NOTHING;
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
+            previousTime = now;
             return ARROW_UP;
         } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
+            previousTime = now;
             return ARROW_DOWN;
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+            previousTime = now;
             return ESC;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
+            previousTime = now;
             return ENTER;
         }
 #else
         char input = getch();
         switch (input) {
             case 65: // up
+            previousTime = baseDelay;
                 return ARROW_UP;
                 break;
             case 66: // down
+            previousTime = baseDelay;
                 return ARROW_DOWN;
                 break;
             case 13: // enter
+            previousTime = baseDelay;
                 return ENTER;
                 break;
             case 27: //esc
+            previousTime = baseDelay;
                 return ESC;
             default:
                 break;
@@ -99,6 +112,7 @@ protected:
     size_t xStart;
 
 public:
+
     virtual void update() {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -114,12 +128,10 @@ public:
     }
 
 protected:
-    void configureScreen(){
+    void configureScreen() {
         canvas = generateCanvas();
         fillMenuItems();
-        cout << canvas.size();
-        cout << SCREEN_HEIGHT << " " << SCREEN_WIDTH;
-        overwriteCords();
+        calculateCords();
         drawMenuItems();
     }
 
@@ -138,10 +150,10 @@ protected:
         }
     }
 
-    virtual void fillMenuItems(){};
+    virtual void fillMenuItems() {};
 
 private:
-    virtual void overwriteCords() {
+    virtual void calculateCords() {
         yStart = (SCREEN_HEIGHT - menuItems.size()) / 2;
         xStart = (SCREEN_WIDTH - menuItems[1].size()) / 2;
     }
@@ -160,19 +172,37 @@ protected:
                 "6.  Author   ",
                 "7.  Exit     ",
         };
-
-        Screen::fillMenuItems();
     }
 
 private:
     int point = 1;
 
-    size_t yPoint = yStart + point;
-    const size_t xPoint = xStart - 2;
+    size_t yPoint;
+    size_t xPoint;
 
 public:
     Menu() {
         configureScreen();
+        yPoint = yStart + point;
+        xPoint = xStart - 2;
+        canvas[yPoint][xPoint] = '*';
+        update();
+    }
+
+    void render() {
+        while (true) {
+            switch (Buttons::getKeyCode()) {
+                case (Buttons::Keys::ARROW_DOWN):
+                    movePointDown();
+                    break;
+                case (Buttons::Keys::ARROW_UP):
+                    movePointUp();
+                    break;
+                case (Buttons::Keys::ENTER):
+
+                    break;
+            }
+        }
     }
 
     void update() override {
@@ -199,11 +229,6 @@ private:
             yPoint = yStart + point;
             canvas[yPoint][xPoint] = '*';
         }
-    }
-
-    void drawMenuItems() override {
-        Screen::drawMenuItems();
-        canvas[yPoint][xPoint] = '*';
     }
 };
 
@@ -432,7 +457,7 @@ private:
     }
 
 protected:
-    void fillMenuItems() override{
+    void fillMenuItems() override {
         menuItems = {
                 "--------------------------------------------",
                 "| cos(x) * pow(e, x) on the segment [1,5]: |",
@@ -554,7 +579,7 @@ private:
 
 class Author : public Screen {
 protected:
-    void fillMenuItems() override{
+    void fillMenuItems() override {
 
     }
 
@@ -575,14 +600,13 @@ public:
 
 
 static void configure() {
-    //ios::sync_with_stdio(false);
+//    ios::sync_with_stdio(false);
     cin.tie(nullptr);
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
     SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
-    cout << csbi.srWindow.Bottom << " asdasd " << csbi.srWindow.Top;
 #else
     struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -593,25 +617,13 @@ static void configure() {
 
 int main() {
     configure();
-    //Menu menu;
+    Menu menu;
     //Table table;
     //Graphic graphic;
     //Equation equation;
     //Integrals integrals;
     //Animation animation;
     Author author;
-    author.update();
-    while (true) {
-//        switch (Buttons::getKeyCode()) {
-//            case (Buttons::Keys::ARROW_DOWN):
-//                app.menu.movePointDown();
-//                break;
-//            case (Buttons::Keys::ARROW_UP):
-//                app.menu.movePointUp();
-//                break;
-//            case (Buttons::Keys::ENTER):
-//
-//                break;
-//        }
-    }
+    menu.render();
+
 }

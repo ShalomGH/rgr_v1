@@ -571,8 +571,26 @@ public:
     }
 };
 
-class App {
-public:
+
+static void configure() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
+    SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
+    cout << csbi.srWindow.Bottom << " asdasd " << csbi.srWindow.Top;
+#else
+    struct winsize size{};
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+        SCREEN_HEIGHT = size.ws_row;
+        SCREEN_WIDTH = size.ws_col;
+#endif
+}
+
+int main() {
+    configure();
     //Menu menu;
     //Table table;
     //Graphic graphic;
@@ -580,33 +598,7 @@ public:
     //Integrals integrals;
     //Animation animation;
     Author author;
-
-    App() {
-        configure();
-    }
-
-private:
-    static void configure() {
-        ios::sync_with_stdio(false);
-        cin.tie(nullptr);
-#ifdef _WIN32
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
-        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
-        cout << csbi.srWindow.Bottom << " asdasd " << csbi.srWindow.Top;
-#else
-        struct winsize size{};
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-        SCREEN_HEIGHT = size.ws_row;
-        SCREEN_WIDTH = size.ws_col;
-#endif
-    }
-};
-
-int main() {
-    App app;
-    app.author.update();
+    author.update();
     while (true) {
 //        switch (Buttons::getKeyCode()) {
 //            case (Buttons::Keys::ARROW_DOWN):

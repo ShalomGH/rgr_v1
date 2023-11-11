@@ -115,7 +115,7 @@ public:
 
 protected:
     void configureScreen(){
-        generateCanvas(canvas);
+        canvas = generateCanvas();
         fillMenuItems();
         cout << canvas.size();
         cout << SCREEN_HEIGHT << " " << SCREEN_WIDTH;
@@ -123,9 +123,11 @@ protected:
         drawMenuItems();
     }
 
-    static void generateCanvas(vector<vector<char>> canvas1) {
+    static vector<vector<char>> generateCanvas() {
+        vector<vector<char>> canvas1;
         canvas1.resize(SCREEN_HEIGHT);
         for (auto &i: canvas1) i.resize(SCREEN_WIDTH);
+        return canvas1;
     }
 
     virtual void drawMenuItems() {
@@ -522,7 +524,7 @@ private:
 public:
     Animation() {
         frames.resize(framesStr.size());
-        for (int i = 0; i < frames.size(); i++) generateCanvas(frames[i]);
+        for (int i = 0; i < frames.size(); i++) frames[i] = generateCanvas();
         drawFrames();
     }
 

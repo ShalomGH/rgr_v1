@@ -10,9 +10,12 @@
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
 
 
+
 #ifdef _WIN32
 
 #include <windows.h>
+#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
+
 
 #else
 
@@ -137,6 +140,9 @@ public:
     };
 
     virtual void update() {
+#ifdef _WIN32
+        cout << CLEAR_CODE;
+#endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
                 if (canvas[i][j]) {

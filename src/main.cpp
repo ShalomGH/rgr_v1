@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <ctime>
+#include <chrono>
 
 
 #define RESET_CODE   "\033[0m"
@@ -47,8 +48,8 @@ public:
     static const char RESET = '%';
 };
 
-static int previousTime = 0;
-static const int baseDelay = 1;
+static auto previousTime = std::chrono::system_clock::now();
+static const int baseDelay = 250;
 
 class Buttons {
 public:
@@ -61,8 +62,10 @@ public:
     };
 
     static int getKeyCode() {
-        time_t now = time(0);
-        if (previousTime + baseDelay > now) return NOTHING;
+        auto now = std::chrono::system_clock::now();
+        //cout << std::chrono::duration_cast<std::chrono::milliseconds>(now - previousTime).count() << endl;
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousTime).count() - baseDelay < 0)
+            return NOTHING;
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
             previousTime = now;
@@ -112,6 +115,16 @@ protected:
     size_t xStart;
 
 public:
+
+    virtual void render() {
+        while (true) {
+            switch (Buttons::getKeyCode()) {
+                case (Buttons::Keys::ESC):
+
+                    break;
+            }
+        }
+    };
 
     virtual void update() {
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
@@ -189,7 +202,7 @@ public:
         update();
     }
 
-    void render() {
+    void render() override {
         while (true) {
             switch (Buttons::getKeyCode()) {
                 case (Buttons::Keys::ARROW_DOWN):
@@ -265,7 +278,7 @@ private:
 
 public:
     Table() {
-
+        configureScreen();
         drawAnswers();
     }
 
@@ -351,6 +364,7 @@ private:
 
 public:
     Graphic() {
+        configureScreen();
         drawCoordinates();
         drawGraphic();
     }
@@ -393,8 +407,7 @@ private:
 
 public:
     Equation() {
-        fillMenuItems();
-        drawMenuItems();
+        configureScreen();
         drawAnswers();
     }
 
@@ -424,7 +437,7 @@ private:
         return x;
     }
 
-    void drawMenuItems() {
+    void drawMenuItems() override {
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
                 canvas[i + yStart][j + xStart] = menuItems[i][j];
@@ -475,6 +488,7 @@ protected:
 
 public:
     Integrals() {
+        configureScreen();
         drawAnswers();
     }
 
@@ -580,11 +594,6 @@ private:
 class Author : public Screen {
 protected:
     void fillMenuItems() override {
-
-    }
-
-public:
-    Author() {
         menuItems = {
                 R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \)",
                 "RGR for programming                                        ",
@@ -594,6 +603,10 @@ public:
                 "kizyakin kizyak kizyakovich                                ",
                 R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /)",
         };
+    }
+
+public:
+    Author() {
         configureScreen();
     }
 };
@@ -617,13 +630,26 @@ static void configure() {
 
 int main() {
     configure();
-    Menu menu;
-    //Table table;
-    //Graphic graphic;
-    //Equation equation;
-    //Integrals integrals;
-    //Animation animation;
-    Author author;
-    menu.render();
+    Screen *screens[7];
 
+    Menu *menu = new Menu;
+    Table *table = new Table;
+    //Graphic* graphic = new Graphic;
+    Equation *equation = new Equation;
+    Integrals *integrals = new Integrals;
+    //Animation* animation = new Animation;
+    Author *author = new Author;
+
+    screens[0] = dynamic_cast<Screen *>(menu);
+    screens[1] = dynamic_cast<Screen *>(author);
+
+    screens[0]->render();
+
+    delete menu;
+    delete table;
+//    delete graphic;
+    delete equation;
+    delete integrals;
+//    delete animation;
+    delete author;
 }

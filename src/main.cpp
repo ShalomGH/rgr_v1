@@ -63,7 +63,6 @@ public:
 
     static int getKeyCode() {
         auto now = std::chrono::system_clock::now();
-        //cout << std::chrono::duration_cast<std::chrono::milliseconds>(now - previousTime).count() << endl;
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousTime).count() - baseDelay < 0)
             return NOTHING;
 #ifdef _WIN32
@@ -105,6 +104,19 @@ public:
     }
 };
 
+enum ScreenIds {
+    MENU = 0,
+    TABLE,
+    GRAPHIC,
+    EQUATION,
+    INTEGRALS,
+    ANIMATION,
+    AUTHOR,
+    EXIT,
+};
+
+static void setScreen(ScreenIds id);
+
 
 class Screen {
 protected:
@@ -117,10 +129,11 @@ protected:
 public:
 
     virtual void render() {
+        update();
         while (true) {
             switch (Buttons::getKeyCode()) {
                 case (Buttons::Keys::ESC):
-
+                    setScreen(ScreenIds::MENU);
                     break;
             }
         }
@@ -172,6 +185,15 @@ private:
     }
 };
 
+static Screen *screens[7];
+static void setScreen(ScreenIds id) {
+    if (id == EXIT) exit(1);
+    screens[id]->render();
+}
+
+
+
+
 class Menu : public Screen {
 protected:
     void fillMenuItems() override {
@@ -199,10 +221,10 @@ public:
         yPoint = yStart + point;
         xPoint = xStart - 2;
         canvas[yPoint][xPoint] = '*';
-        update();
     }
 
     void render() override {
+        update();
         while (true) {
             switch (Buttons::getKeyCode()) {
                 case (Buttons::Keys::ARROW_DOWN):
@@ -212,7 +234,7 @@ public:
                     movePointUp();
                     break;
                 case (Buttons::Keys::ENTER):
-
+                    setScreen(static_cast<ScreenIds>(point));
                     break;
             }
         }
@@ -364,14 +386,14 @@ private:
 
 public:
     Graphic() {
-        configureScreen();
+        canvas = generateCanvas();
         drawCoordinates();
         drawGraphic();
     }
 
 protected:
     void fillMenuItems() override {
-
+        menuItems = {" "};
     }
 
 private:
@@ -628,28 +650,21 @@ static void configure() {
 #endif
 }
 
+
 int main() {
     configure();
-    Screen *screens[7];
 
-    Menu *menu = new Menu;
-    Table *table = new Table;
-    //Graphic* graphic = new Graphic;
-    Equation *equation = new Equation;
-    Integrals *integrals = new Integrals;
-    //Animation* animation = new Animation;
-    Author *author = new Author;
-
-    screens[0] = dynamic_cast<Screen *>(menu);
-    screens[1] = dynamic_cast<Screen *>(author);
+    screens[0] = new Menu;
+    screens[1] = new Table;
+    screens[2] = new Graphic;
+    screens[3] = new Equation;
+    screens[4] = new Integrals;
+    screens[5] = new Animation;
+    screens[6] = new Author;
 
     screens[0]->render();
 
-    delete menu;
-    delete table;
-//    delete graphic;
-    delete equation;
-    delete integrals;
-//    delete animation;
-    delete author;
+
+    for (int i = 0; i < 7; i++) delete screens[i];
+    return 0;
 }

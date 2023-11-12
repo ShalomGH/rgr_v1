@@ -370,11 +370,11 @@ class Graphic : public Screen {
 
 private:
     static double function(double x) {
-        return sin(x);
+        return x*x;
     }
 
-    const double xScale = SCREEN_WIDTH / (2 * M_PI);
-    const double yScale = SCREEN_HEIGHT / 2.0;
+    const double xScale = SCREEN_WIDTH / (4 * M_PI);
+    const double yScale = SCREEN_HEIGHT / 4.0;
 
 public:
     Graphic() {
@@ -401,10 +401,10 @@ private:
     }
 
     void drawGraphic() {
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y = static_cast<int>(round(function(radians) * yScale)) + SCREEN_HEIGHT / 2;
-            canvas[y][x] = '*';
+            y < canvas.size() ? canvas[y][x] = '*' : x++;
         }
     }
 };
@@ -584,7 +584,6 @@ private:
     };
 
 
-
     vector<vector<vector<char>>> frames;
     int frame = 0;
     bool isGoing = false;
@@ -606,7 +605,7 @@ public:
     void render() override {
         auto now = std::chrono::system_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() -
-                    delay > 0) {
+            delay > 0) {
             update();
             previousAnimationTime = now;
         }

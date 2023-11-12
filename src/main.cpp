@@ -10,10 +10,10 @@
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
 
 
-
 #ifdef _WIN32
 
 #include <windows.h>
+
 #define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 
@@ -533,17 +533,13 @@ private:
     }
 };
 
+
+static auto previousAnimationTime = std::chrono::system_clock::now();
+
 class Animation : public Screen {
 
 private:
-    const int delay = 150;
-//    std::chrono:: now = std::chrono::system_clock::now();
-//    std::time_t end_time = std::chrono::system_clock::to_time_t(now);
-
-    vector<vector<vector<char>>> frames;
-    int frame = 0;
-    bool isGoing = false;
-
+    const int delay = 50;
     vector<vector<string>> framesStr{
             {
                     "  |    |  ",
@@ -565,12 +561,13 @@ private:
                     "  |    |  ",
                     "()|()()|()",
             },
-            {
-                    "          ",
-                    "  |    |  ",
-                    "()|()()|()",
-            },
     };
+
+
+
+    vector<vector<vector<char>>> frames;
+    int frame = 0;
+    bool isGoing = false;
 
 public:
     Animation() {
@@ -584,11 +581,16 @@ public:
     void update() override {
         canvas = getFrame();
         Screen::update();
-        Sleep(delay);
     }
 
     void render() override {
-
+        auto now = std::chrono::system_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() -
+                    delay > 0) {
+            update();
+            previousAnimationTime = now;
+        }
+        Screen::render();
     }
 
 private:

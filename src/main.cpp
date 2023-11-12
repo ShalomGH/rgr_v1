@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <ctime>
 #include <chrono>
 
 
@@ -48,8 +47,8 @@ public:
     static const char RESET = '%';
 };
 
-static auto previousTime = std::chrono::system_clock::now();
-static const int baseDelay = 250;
+static auto previousButtonsTime = std::chrono::system_clock::now();
+static const int baseButtonsDelay = 250;
 
 class Buttons {
 public:
@@ -63,39 +62,40 @@ public:
 
     static int getKeyCode() {
         auto now = std::chrono::system_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousTime).count() - baseDelay < 0)
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousButtonsTime).count() -
+            baseButtonsDelay < 0)
             return NOTHING;
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
-            previousTime = now;
+            previousButtonsTime = now;
             return ARROW_UP;
         } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
-            previousTime = now;
+            previousButtonsTime = now;
             return ARROW_DOWN;
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
-            previousTime = now;
+            previousButtonsTime = now;
             return ESC;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
-            previousTime = now;
+            previousButtonsTime = now;
             return ENTER;
         }
 #else
         char input = getch();
         switch (input) {
             case 65: // up
-            previousTime = baseDelay;
+            previousButtonsTime = baseButtonsDelay;
                 return ARROW_UP;
                 break;
             case 66: // down
-            previousTime = baseDelay;
+            previousButtonsTime = baseButtonsDelay;
                 return ARROW_DOWN;
                 break;
             case 13: // enter
-            previousTime = baseDelay;
+            previousButtonsTime = baseButtonsDelay;
                 return ENTER;
                 break;
             case 27: //esc
-            previousTime = baseDelay;
+            previousButtonsTime = baseButtonsDelay;
                 return ESC;
             default:
                 break;
@@ -115,7 +115,7 @@ enum ScreenIds {
     EXIT,
 };
 
-static void setScreen(ScreenIds id);
+ScreenIds screenId = ScreenIds::MENU;
 
 
 class Screen {
@@ -129,13 +129,10 @@ protected:
 public:
 
     virtual void render() {
-        update();
-        while (true) {
-            switch (Buttons::getKeyCode()) {
-                case (Buttons::Keys::ESC):
-                    setScreen(ScreenIds::MENU);
-                    break;
-            }
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ESC):
+                screenId = ScreenIds::MENU;
+                break;
         }
     };
 
@@ -185,14 +182,6 @@ private:
     }
 };
 
-static Screen *screens[7];
-static void setScreen(ScreenIds id) {
-    if (id == EXIT) exit(1);
-    screens[id]->render();
-}
-
-
-
 
 class Menu : public Screen {
 protected:
@@ -224,19 +213,16 @@ public:
     }
 
     void render() override {
-        update();
-        while (true) {
-            switch (Buttons::getKeyCode()) {
-                case (Buttons::Keys::ARROW_DOWN):
-                    movePointDown();
-                    break;
-                case (Buttons::Keys::ARROW_UP):
-                    movePointUp();
-                    break;
-                case (Buttons::Keys::ENTER):
-                    setScreen(static_cast<ScreenIds>(point));
-                    break;
-            }
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ARROW_DOWN):
+                movePointDown();
+                break;
+            case (Buttons::Keys::ARROW_UP):
+                movePointUp();
+                break;
+            case (Buttons::Keys::ENTER):
+                screenId = static_cast<ScreenIds>(point);
+                break;
         }
     }
 
@@ -545,7 +531,8 @@ class Animation : public Screen {
 
 private:
     const int delay = 150;
-
+//    std::chrono:: now = std::chrono::system_clock::now();
+//    std::time_t end_time = std::chrono::system_clock::to_time_t(now);
 
     vector<vector<vector<char>>> frames;
     int frame = 0;
@@ -579,13 +566,12 @@ private:
             },
     };
 
-    const size_t y_start = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
-    const size_t x_start = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
-
 public:
     Animation() {
         frames.resize(framesStr.size());
         for (int i = 0; i < frames.size(); i++) frames[i] = generateCanvas();
+        yStart = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
+        xStart = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
         drawFrames();
     }
 
@@ -593,6 +579,10 @@ public:
         canvas = getFrame();
         Screen::update();
         Sleep(delay);
+    }
+
+    void render() override {
+
     }
 
 private:
@@ -606,7 +596,7 @@ private:
         for (int k = 0; k < framesStr.size(); ++k) {
             for (int i = 0; i < framesStr[k].size(); i++) {
                 for (int j = 0; j < framesStr[k][i].size(); j++) {
-                    frames[k][i + y_start][j + x_start] = framesStr[k][i][j];
+                    frames[k][i + yStart][j + xStart] = framesStr[k][i][j];
                 }
             }
         }
@@ -635,7 +625,7 @@ public:
 
 
 static void configure() {
-//    ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -652,6 +642,8 @@ static void configure() {
 
 
 int main() {
+    Screen *screens[7];
+
     configure();
 
     screens[0] = new Menu;
@@ -662,8 +654,15 @@ int main() {
     screens[5] = new Animation;
     screens[6] = new Author;
 
-    screens[0]->render();
+    ScreenIds preId = ScreenIds::TABLE;
 
+    while (screenId != ScreenIds::EXIT) {
+        if (screenId != preId) {
+            screens[screenId]->update();
+            preId = screenId;
+        }
+        screens[screenId]->render();
+    }
 
     for (int i = 0; i < 7; i++) delete screens[i];
     return 0;

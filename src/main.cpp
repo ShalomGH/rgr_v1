@@ -181,7 +181,7 @@ public:
 
     virtual void update() {
 #ifdef _WIN32
-        cout << CLEAR_CODE;
+//        cout << CLEAR_CODE;
 #endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -202,7 +202,6 @@ protected:
         fillMenuItems();
         calculateCords();
         drawMenuItems();
-        update();
     }
 
     static vector<vector<char>> generateCanvas() {
@@ -257,7 +256,6 @@ public:
         yPoint = yStart + point;
         xPoint = xStart - 2;
         canvas[yPoint][xPoint] = '*';
-        canvas[yPoint][0] = ' ';
     }
 
     void render() override {
@@ -268,7 +266,7 @@ public:
             case (Buttons::Keys::ARROW_UP):
                 movePointUp();
                 break;
-            case (Buttons::Keys::ENTER):
+            case (Buttons::Keys::ESC):
                 screenId = static_cast<ScreenIds>(point);
                 break;
         }
@@ -564,7 +562,7 @@ public:
 //                break;
         }
         if (isnan(A)) getAFromUser();
-        if (!isnan(A)&& isnan(B)) getBFromUser();
+        if (!isnan(A) && isnan(B)) getBFromUser();
     }
 
 private:
@@ -602,11 +600,11 @@ private:
 
     void drawMenuItems() override {
         if (!isnan(A)) {
-            if(A/10!=0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
+            if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
             menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
         }
         if (!isnan(B)) {
-            if(B/10!=0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
+            if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
             menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
         }
         for (int i = 0; i < menuItems.size(); i++) {
@@ -652,6 +650,15 @@ protected:
                 "--------------------------------------------",
                 "| Trapeze method:                          |",
                 "--------------------------------------------",
+                "--------------------------------------------",
+                "| Monte Carlo method:                      |",
+                "--------------------------------------------",
+                "--------------------------------------------",
+                "| Gauss method:                            |",
+                "--------------------------------------------",
+                "--------------------------------------------",
+                "| Finite Difference method:                |",
+                "--------------------------------------------",
         };
     }
 
@@ -676,10 +683,40 @@ private:
         return s;
     }
 
+    [[nodiscard]] double gaussMethod() const {
+        double x1 = -0.5773502691896257, x2 = 0.5773502691896257;
+        double w1 = 1.0, w2 = 1.0;
+        double integral = 0.5 * ((B - A) * (w1 * function(0.5 * (B - A) * x1 + 0.5 * (B + A)) +
+                                            w2 * function(0.5 * (B - A) * x2 + 0.5 * (B + A))));
+        return integral;
+    }
+
+    [[nodiscard]] double monteCarloMethod() {
+        double sum = 0.0;
+        for (int i = 0; i < N; i++) {
+            double x = A + static_cast<double>(rand()) / RAND_MAX * (B - A);
+            sum += function(x);
+        }
+        return (B - A) * sum / N;
+    }
+
+    [[nodiscard]] double finiteDifferenceMethod() {
+        double h = (B - A) / N;
+        double sum = 0.0;
+        for (int i = 0; i < N; i++) {
+            sum += function(A + (i + 0.5) * h);
+        }
+        return h * sum;
+    }
+
+
     void drawAnswers() {
-        string answers[2];
+        string answers[4];
         answers[0] = to_string(trapezeMethod());
         answers[1] = to_string(rectangleMethod());
+        answers[2] = to_string(gaussMethod());
+        answers[3] = to_string(monteCarloMethod());
+        answers[4] = to_string(finiteDifferenceMethod());
         int k = 0;
         for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {
@@ -747,7 +784,7 @@ private:
 public:
     Animation() {
         frames.resize(framesStr.size());
-        for (auto & fr : frames) fr = generateCanvas();
+        for (auto &fr: frames) fr = generateCanvas();
         yStart = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
         xStart = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
         drawFrames();
@@ -835,7 +872,6 @@ int main() {
     Screen *screens[7];
 
 
-
     screens[0] = new Menu;
     screens[1] = new Table;
     screens[2] = new Graphic;
@@ -854,7 +890,7 @@ int main() {
         screens[screenId]->render();
     }
 
-    for(auto & screen : screens) delete screen;
+    for (auto &screen: screens) delete screen;
     exit(1);
     return 0;
 }

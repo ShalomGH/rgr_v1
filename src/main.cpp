@@ -374,7 +374,7 @@ private:
     };
 
     static double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+        return pow(M_E, 2*x) * pow(x, 1/3) - sin(x);
     }
 
     static double F2(double x) {
@@ -686,14 +686,18 @@ class Author : public Screen {
 protected:
     void fillMenuItems() override {
         menuItems = {
-                R"(;/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \%)",
-                "?RGR for programming                                       ",
-                " University: OmSTU                                          ",
-                " Faculty: FiTIKS                                            ",
-                " Group: PI-232                                              ",
-                " Zagarov Svyatoslav Alekseevich                            %",
-                R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /%)",
+                R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \    )",
+                "RGR for programming                                       ",
+                " University: OmSTU                                         ",
+                " Faculty: FiTIKS                                           ",
+                " Group: PI-232                                             ",
+                " Zagarov Svyatoslav Alekseevich                            ",
+                R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    )",
         };
+        menuItems[0].insert(0, 1, Color::GREEN);
+        menuItems[1].insert(0, 1, Color::MAGENTA);
+        menuItems[menuItems.size()-1].insert(0, 1, Color::GREEN);
+        menuItems[menuItems.size()-1].insert(menuItems[0].size()-2, menuItems[0].size()-1, Color::RESET);
     }
 
 public:

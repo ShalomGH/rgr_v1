@@ -369,12 +369,12 @@ private:
 class Graphic : public Screen {
 private:
     vector<string> functionsNames{
-            "* - E^(2 * x) * x^(1 / 3) - sin(x)",
-            "# - 10 / (2 + x^2)                ",
+            "* - E^(2 * x) * x^(1 / 3) - sin(x)  ",
+            "# - 10 / (2 + x^2)                  ",
     };
 
     static double F1(double x) {
-        return pow(M_E, 2*x) * pow(x, 1/3) - sin(x);
+        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
     }
 
     static double F2(double x) {
@@ -411,6 +411,7 @@ public:
         drawCoordinates();
         drawGraphic();
         drawFunctionsNames();
+        drawCordNames();
         Screen::update();
     }
 
@@ -420,22 +421,33 @@ protected:
     }
 
 private:
-    void zoomOut(){
-        if(scale>=10) return;
+
+    void drawCordNames() {
+        canvas[SCREEN_HEIGHT / 2 - 1][SCREEN_WIDTH-1] = 'X';
+        canvas[0][SCREEN_WIDTH / 2 + 1] = 'Y';
+    }
+
+    void zoomOut() {
+        if (scale >= 10) return;
         scale++;
         update();
     }
-    void zoomIn(){
-        if(scale<2) return;
+
+    void zoomIn() {
+        if (scale < 2) return;
         scale--;
         update();
     }
 
     void drawFunctionsNames() {
-        for (int x = 0; x < functionsNames[0].size(); ++x) {
-            canvas[0][SCREEN_WIDTH-functionsNames[0].size()+x] = functionsNames[0][x];
-            canvas[1][SCREEN_WIDTH-functionsNames[0].size()+x] = functionsNames[1][x];
+        for (int x = 0; x < functionsNames[0].size()-1; ++x) {
+            canvas[0][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[0][x];
+            canvas[1][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[1][x];
         }
+        canvas[0][SCREEN_WIDTH - functionsNames[0].size() - 2] = Color::GREEN;
+        canvas[1][SCREEN_WIDTH - functionsNames[0].size() - 2] = Color::MAGENTA;
+        canvas[0][SCREEN_WIDTH - 2] = Color::RESET;
+        canvas[1][SCREEN_WIDTH - 2] = Color::RESET;
     }
 
     void drawCoordinates() {
@@ -451,12 +463,21 @@ private:
     void drawGraphic() {
         const double xScale = SCREEN_WIDTH / (2 * M_PI) / scale;
         const double yScale = SCREEN_HEIGHT / 2.0 / scale;
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+        for (int x = 1; x < SCREEN_WIDTH-1; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y1 = static_cast<int>(round(F1(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
             int y2 = static_cast<int>(round(F2(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
-            if (y1 >= 0 && y1 < SCREEN_HEIGHT) canvas[y1][x] = '*';
-            if (y2 >= 0 && y2 < SCREEN_HEIGHT) canvas[y2][x] = '#';
+
+            if (y1 >= 0 && y1 < SCREEN_HEIGHT) {
+                canvas[y1][x] = '*';
+                if(canvas[y1][x-1] != '*') canvas[y1][x-1] = Color::GREEN;
+                canvas[y1][x+1] = Color::RESET;
+            }
+            if (y2 >= 0 && y2 < SCREEN_HEIGHT) {
+                canvas[y2][x] = '#';
+                if(canvas[y2][x-1] != '#') canvas[y2][x-1] = Color::MAGENTA;
+                canvas[y2][x+1] = Color::RESET;
+            }
         }
     }
 };
@@ -696,8 +717,8 @@ protected:
         };
         menuItems[0].insert(0, 1, Color::GREEN);
         menuItems[1].insert(0, 1, Color::MAGENTA);
-        menuItems[menuItems.size()-1].insert(0, 1, Color::GREEN);
-        menuItems[menuItems.size()-1].insert(menuItems[0].size()-2, menuItems[0].size()-1, Color::RESET);
+        menuItems[menuItems.size() - 1].insert(0, 1, Color::GREEN);
+        menuItems[menuItems.size() - 1].insert(menuItems[0].size() - 2, menuItems[0].size() - 1, Color::RESET);
     }
 
 public:
@@ -722,7 +743,6 @@ static void configure() {
         SCREEN_WIDTH = size.ws_col;
 #endif
 }
-
 
 
 int main() {

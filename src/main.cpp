@@ -423,7 +423,7 @@ protected:
 private:
 
     void drawCordNames() {
-        canvas[SCREEN_HEIGHT / 2 - 1][SCREEN_WIDTH-1] = 'X';
+        canvas[SCREEN_HEIGHT / 2 - 1][SCREEN_WIDTH - 1] = 'X';
         canvas[0][SCREEN_WIDTH / 2 + 1] = 'Y';
     }
 
@@ -440,7 +440,7 @@ private:
     }
 
     void drawFunctionsNames() {
-        for (int x = 0; x < functionsNames[0].size()-1; ++x) {
+        for (int x = 0; x < functionsNames[0].size() - 1; ++x) {
             canvas[0][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[0][x];
             canvas[1][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[1][x];
         }
@@ -463,20 +463,20 @@ private:
     void drawGraphic() {
         const double xScale = SCREEN_WIDTH / (2 * M_PI) / scale;
         const double yScale = SCREEN_HEIGHT / 2.0 / scale;
-        for (int x = 1; x < SCREEN_WIDTH-1; ++x) {
+        for (int x = 1; x < SCREEN_WIDTH - 1; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y1 = static_cast<int>(round(F1(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
             int y2 = static_cast<int>(round(F2(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
 
             if (y1 >= 0 && y1 < SCREEN_HEIGHT) {
                 canvas[y1][x] = '*';
-                if(canvas[y1][x-1] != '*') canvas[y1][x-1] = Color::GREEN;
-                canvas[y1][x+1] = Color::RESET;
+                if (canvas[y1][x - 1] != '*') canvas[y1][x - 1] = Color::GREEN;
+                canvas[y1][x + 1] = Color::RESET;
             }
             if (y2 >= 0 && y2 < SCREEN_HEIGHT) {
                 canvas[y2][x] = '#';
-                if(canvas[y2][x-1] != '#') canvas[y2][x-1] = Color::MAGENTA;
-                canvas[y2][x+1] = Color::RESET;
+                if (canvas[y2][x - 1] != '#') canvas[y2][x - 1] = Color::MAGENTA;
+                canvas[y2][x + 1] = Color::RESET;
             }
         }
     }
@@ -484,8 +484,8 @@ private:
 
 class Equation : public Screen {
 private:
-    const int A = 0;
-    const int B = 4;
+    int A = NULL;
+    int B = NULL;
     const double e = 0.001;
 
     static double function(double x) {
@@ -503,7 +503,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "____________________________________________________",
-                "| Equation x^3 + 3x + 2 = 0 on the segment [0,4]   |",
+                "| Equation x^3 + 3x + 2 = 0 on the segment [  ,  ] |",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
                 "| Bisection method:                                |",
@@ -511,7 +511,41 @@ protected:
         };
     }
 
+public:
+    void render() override {
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ESC):
+                screenId = ScreenIds::MENU;
+                break;
+//            case (Buttons::Keys::ENTER):
+//                screenId = ScreenIds::MENU;
+//                break;
+        }
+        if (A == NULL) getAFromUser();
+        if (A != NULL && B == NULL) getBFromUser();
+    }
+
 private:
+    void getAFromUser() {
+        const string a = "Print A: ";
+        for (int i = 0; i < a.size(); i++) canvas[SCREEN_HEIGHT - 1][i] = a[i];
+        update();
+        cin >> A;
+        drawMenuItems();
+        update();
+    }
+
+    void getBFromUser() {
+        const string a = "Print B: ";
+        for (int i = 0; i < a.size(); i++) canvas[SCREEN_HEIGHT - 1][i] = a[i];
+        update();
+        cin >> B;
+        for (int i = 0; i < a.size(); i++) canvas[SCREEN_HEIGHT - 1][i] = ' ';
+        drawMenuItems();
+        drawAnswers();
+        update();
+    }
+
     [[nodiscard]] double bisectionMethod() const {
         double a = A;
         double b = B;
@@ -525,6 +559,14 @@ private:
     }
 
     void drawMenuItems() override {
+        if (A) {
+            if(A/10!=0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
+            menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
+        }
+        if (B) {
+            if(B/10!=0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
+            menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
+        }
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
                 canvas[i + yStart][j + xStart] = menuItems[i][j];
@@ -659,7 +701,6 @@ private:
 
     vector<vector<vector<char>>> frames;
     int frame = 0;
-    bool isGoing = false;
 
 public:
     Animation() {
@@ -769,5 +810,6 @@ int main() {
     }
 
     for (int i = 0; i < 7; i++) delete screens[i];
+    exit(1);
     return 0;
 }

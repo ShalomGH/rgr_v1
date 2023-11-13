@@ -181,7 +181,7 @@ public:
 
     virtual void update() {
 #ifdef _WIN32
-//        cout << CLEAR_CODE;
+        cout << CLEAR_CODE;
 #endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -266,7 +266,7 @@ public:
             case (Buttons::Keys::ARROW_UP):
                 movePointUp();
                 break;
-            case (Buttons::Keys::ESC):
+            case (Buttons::Keys::ENTER):
                 screenId = static_cast<ScreenIds>(point);
                 break;
         }

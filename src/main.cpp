@@ -691,7 +691,7 @@ private:
         return integral;
     }
 
-    [[nodiscard]] double monteCarloMethod() {
+    [[nodiscard]] double monteCarloMethod() const {
         const int n =  N*100;
         double sum = 0.0;
         for (int i = 0; i < n; i++) {
@@ -701,8 +701,8 @@ private:
         return (B - A) * sum / n;
     }
 
-    [[nodiscard]] double finiteDifferenceMethod() {
-        double h = (B - A) / N;
+    [[nodiscard]] double finiteDifferenceMethod() const {
+        double h = fabs(B - A) / N;
         double sum = 0.0;
         for (int i = 0; i < N; i++) {
             sum += function(A + (i + 0.5) * h);

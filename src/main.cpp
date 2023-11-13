@@ -367,20 +367,51 @@ private:
 };
 
 class Graphic : public Screen {
-
 private:
-    static double function(double x) {
-        return x*x;
+    vector<string> functionsNames{
+            "* - E^(2 * x) * x^(1 / 3) - sin(x)",
+            "# - 10 / (2 + x^2)                ",
+    };
+
+    static double F1(double x) {
+        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
     }
 
-    const double xScale = SCREEN_WIDTH / (4 * M_PI);
-    const double yScale = SCREEN_HEIGHT / 4.0;
+    static double F2(double x) {
+        return 10 / (2 + x * x);
+    }
+
+
+    int scale = 2;
 
 public:
     Graphic() {
         canvas = generateCanvas();
         drawCoordinates();
         drawGraphic();
+        drawFunctionsNames();
+    }
+
+    void render() override {
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ARROW_DOWN):
+                zoomOut();
+                break;
+            case (Buttons::Keys::ARROW_UP):
+                zoomIn();
+                break;
+            case (Buttons::Keys::ESC):
+                screenId = ScreenIds::MENU;
+                break;
+        }
+    }
+
+    void update() override {
+        canvas = generateCanvas();
+        drawCoordinates();
+        drawGraphic();
+        drawFunctionsNames();
+        Screen::update();
     }
 
 protected:
@@ -389,6 +420,23 @@ protected:
     }
 
 private:
+    void zoomOut(){
+        if(scale>=10) return;
+        scale++;
+        update();
+    }
+    void zoomIn(){
+        if(scale<2) return;
+        scale--;
+        update();
+    }
+
+    void drawFunctionsNames() {
+        for (int x = 0; x < functionsNames[0].size(); ++x) {
+            canvas[0][SCREEN_WIDTH-functionsNames[0].size()+x] = functionsNames[0][x];
+            canvas[1][SCREEN_WIDTH-functionsNames[0].size()+x] = functionsNames[1][x];
+        }
+    }
 
     void drawCoordinates() {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
@@ -401,10 +449,14 @@ private:
     }
 
     void drawGraphic() {
-        for (int x = 0; x < SCREEN_WIDTH; x++) {
+        const double xScale = SCREEN_WIDTH / (2 * M_PI) / scale;
+        const double yScale = SCREEN_HEIGHT / 2.0 / scale;
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
-            int y = static_cast<int>(round(function(radians) * yScale)) + SCREEN_HEIGHT / 2;
-            y < canvas.size() ? canvas[y][x] = '*' : x++;
+            int y1 = static_cast<int>(round(F1(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
+            int y2 = static_cast<int>(round(F2(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
+            if (y1 >= 0 && y1 < SCREEN_HEIGHT) canvas[y1][x] = '*';
+            if (y2 >= 0 && y2 < SCREEN_HEIGHT) canvas[y2][x] = '#';
         }
     }
 };
@@ -542,9 +594,9 @@ private:
     const int delay = 650;
     vector<vector<string>> framesStr{
             {
-                    "  /\\  ",
-                    " /__\\ ",
-                    "/    \\",
+                    "  /\\   ",
+                    " /__\\  ",
+                    "/    \\ ",
             },
             {
                     "|    |",
@@ -634,13 +686,13 @@ class Author : public Screen {
 protected:
     void fillMenuItems() override {
         menuItems = {
-                R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \)",
-                "RGR for programming                                        ",
-                "University: OmSTU                                          ",
-                "Faculty: FiTIKS                                            ",
-                "Group: PI-232                                              ",
-                "kizyakin kizyak kizyakovich                                ",
-                R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /)",
+                R"(;/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \%)",
+                "?RGR for programming                                       ",
+                " University: OmSTU                                          ",
+                " Faculty: FiTIKS                                            ",
+                " Group: PI-232                                              ",
+                " Zagarov Svyatoslav Alekseevich                            %",
+                R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /%)",
         };
     }
 

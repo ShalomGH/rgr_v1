@@ -61,6 +61,16 @@ public:
         ARROW_DOWN,
         ENTER,
         ESC,
+        ZERO,
+        ONE,
+        TWO,
+        THREE,
+        FOUR,
+        FIVE,
+        SIX,
+        SEVEN,
+        EIGHT,
+        NINE,
     };
 
     static int getKeyCode() {
@@ -81,7 +91,37 @@ public:
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
             previousButtonsTime = now;
             return ENTER;
-        }
+        }  /*else if (GetAsyncKeyState(0x30) & 0x8000) {  // Клавиша 0
+            previousButtonsTime = now;
+            return ZERO;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 1
+            previousButtonsTime = now;
+            return ONE;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 2
+            previousButtonsTime = now;
+            return TWO;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 3
+            previousButtonsTime = now;
+            return THREE;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 4
+            previousButtonsTime = now;
+            return FOUR;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 5
+            previousButtonsTime = now;
+            return FIVE;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 6
+            previousButtonsTime = now;
+            return SIX;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 7
+            previousButtonsTime = now;
+            return SEVEN;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 8
+            previousButtonsTime = now;
+            return EIGHT;
+        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 9
+            previousButtonsTime = now;
+            return NINE;
+        }*/
 #else
         char input = getch();
         switch (input) {
@@ -141,7 +181,7 @@ public:
 
     virtual void update() {
 #ifdef _WIN32
-        cout << CLEAR_CODE;
+//        cout << CLEAR_CODE;
 #endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -226,7 +266,7 @@ public:
             case (Buttons::Keys::ARROW_UP):
                 movePointUp();
                 break;
-            case (Buttons::Keys::ENTER):
+            case (Buttons::Keys::ESC):
                 screenId = static_cast<ScreenIds>(point);
                 break;
         }
@@ -484,8 +524,8 @@ private:
 
 class Equation : public Screen {
 private:
-    int A = NULL;
-    int B = NULL;
+    int A = NAN;
+    int B = NAN;
     const double e = 0.001;
 
     static double function(double x) {
@@ -521,8 +561,8 @@ public:
 //                screenId = ScreenIds::MENU;
 //                break;
         }
-        if (A == NULL) getAFromUser();
-        if (A != NULL && B == NULL) getBFromUser();
+        if (isnan(A)) getAFromUser();
+        if (!isnan(A)&& isnan(B)) getBFromUser();
     }
 
 private:
@@ -559,11 +599,11 @@ private:
     }
 
     void drawMenuItems() override {
-        if (A) {
+        if (!isnan(A)) {
             if(A/10!=0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
             menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
         }
-        if (B) {
+        if (!isnan(B)) {
             if(B/10!=0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
             menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
         }
@@ -705,7 +745,7 @@ private:
 public:
     Animation() {
         frames.resize(framesStr.size());
-        for (int i = 0; i < frames.size(); i++) frames[i] = generateCanvas();
+        for (auto & fr : frames) fr = generateCanvas();
         yStart = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
         xStart = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
         drawFrames();
@@ -770,13 +810,15 @@ public:
 
 
 static void configure() {
-    ios::sync_with_stdio(false);
+//    ios::sync_with_stdio(false);
     cin.tie(nullptr);
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
     SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
+    int a = /*csbi.srWindow.Bottom - */csbi.srWindow.Top;
+    int b = SCREEN_HEIGHT;
 #else
     struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -787,9 +829,10 @@ static void configure() {
 
 
 int main() {
+    configure();
     Screen *screens[7];
 
-    configure();
+
 
     screens[0] = new Menu;
     screens[1] = new Table;
@@ -809,7 +852,7 @@ int main() {
         screens[screenId]->render();
     }
 
-    for (int i = 0; i < 7; i++) delete screens[i];
+    for(auto & screen : screens) delete screen;
     exit(1);
     return 0;
 }

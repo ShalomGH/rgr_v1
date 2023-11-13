@@ -61,16 +61,16 @@ public:
         ARROW_DOWN,
         ENTER,
         ESC,
-        ZERO,
-        ONE,
-        TWO,
-        THREE,
-        FOUR,
-        FIVE,
-        SIX,
-        SEVEN,
-        EIGHT,
-        NINE,
+//        ZERO,
+//        ONE,
+//        TWO,
+//        THREE,
+//        FOUR,
+//        FIVE,
+//        SIX,
+//        SEVEN,
+//        EIGHT,
+//        NINE,
     };
 
     static int getKeyCode() {
@@ -181,7 +181,7 @@ public:
 
     virtual void update() {
 #ifdef _WIN32
-//        cout << CLEAR_CODE;
+        cout << CLEAR_CODE;
 #endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -202,6 +202,7 @@ protected:
         fillMenuItems();
         calculateCords();
         drawMenuItems();
+        update();
     }
 
     static vector<vector<char>> generateCanvas() {
@@ -256,6 +257,7 @@ public:
         yPoint = yStart + point;
         xPoint = xStart - 2;
         canvas[yPoint][xPoint] = '*';
+        canvas[yPoint][0] = ' ';
     }
 
     void render() override {
@@ -266,7 +268,7 @@ public:
             case (Buttons::Keys::ARROW_UP):
                 movePointUp();
                 break;
-            case (Buttons::Keys::ESC):
+            case (Buttons::Keys::ENTER):
                 screenId = static_cast<ScreenIds>(point);
                 break;
         }
@@ -810,7 +812,7 @@ public:
 
 
 static void configure() {
-//    ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;

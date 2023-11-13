@@ -683,16 +683,30 @@ private:
         return s;
     }
 
-    [[nodiscard]] double gaussMethod() const {
-        double x1 = -0.5773502691896257, x2 = 0.5773502691896257;
-        double w1 = 1.0, w2 = 1.0;
-        double integral = 0.5 * ((B - A) * (w1 * function(0.5 * (B - A) * x1 + 0.5 * (B + A)) +
-                                            w2 * function(0.5 * (B - A) * x2 + 0.5 * (B + A))));
+    [[nodiscard]] double gaussMethod() {
+        double *weights = new double[N];
+        double *nodes = new double[N];
+
+        double integral = 0.0;
+
+        for (int i = 0; i < N; ++i) {
+            nodes[i] = cos(M_PI * (4.0 * i + 1.0) / (4.0 * N + 2.0));
+            weights[i] = M_PI / (N + 0.5) * (1.0 - nodes[i] * nodes[i]);
+        }
+
+        double a = 0.5 * (B - A);
+        double b = 0.5 * (B + A);
+
+        for (int i = 0; i < N; ++i) {
+            double xi = a * nodes[i] + b;
+            integral += weights[i] * function(xi);
+        }
+        integral *= A;
         return integral;
     }
 
     [[nodiscard]] double monteCarloMethod() const {
-        const int n =  N*100;
+        const int n = N * 100;
         double sum = 0.0;
         for (int i = 0; i < n; i++) {
             double x = A + static_cast<double>(rand()) / RAND_MAX * (B - A);

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <chrono>
 
 
 #define RESET_CODE   "\033[0m"
@@ -12,6 +13,9 @@
 #ifdef _WIN32
 
 #include <windows.h>
+
+#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
+
 
 #else
 
@@ -46,6 +50,8 @@ public:
     static const char RESET = '%';
 };
 
+static auto previousButtonsTime = std::chrono::system_clock::now();
+static const int baseButtonsDelay = 250;
 
 class Buttons {
 public:
@@ -58,29 +64,41 @@ public:
     };
 
     static int getKeyCode() {
+        auto now = std::chrono::system_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousButtonsTime).count() -
+            baseButtonsDelay < 0)
+            return NOTHING;
 #ifdef _WIN32
         if (GetAsyncKeyState(VK_UP) & 0x8000) {  // Верхняя стрелка
+            previousButtonsTime = now;
             return ARROW_UP;
         } else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {  // Нижняя стрелка
+            previousButtonsTime = now;
             return ARROW_DOWN;
         } else if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {  // Клавиша ESC
+            previousButtonsTime = now;
             return ESC;
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
+            previousButtonsTime = now;
             return ENTER;
         }
 #else
         char input = getch();
         switch (input) {
             case 65: // up
+            previousButtonsTime = baseButtonsDelay;
                 return ARROW_UP;
                 break;
             case 66: // down
+            previousButtonsTime = baseButtonsDelay;
                 return ARROW_DOWN;
                 break;
             case 13: // enter
+            previousButtonsTime = baseButtonsDelay;
                 return ENTER;
                 break;
             case 27: //esc
+            previousButtonsTime = baseButtonsDelay;
                 return ESC;
             default:
                 break;
@@ -89,20 +107,42 @@ public:
     }
 };
 
+enum ScreenIds {
+    MENU = 0,
+    TABLE,
+    GRAPHIC,
+    EQUATION,
+    INTEGRALS,
+    ANIMATION,
+    AUTHOR,
+    EXIT,
+};
+
+ScreenIds screenId = ScreenIds::MENU;
+
 
 class Screen {
 protected:
     vector<vector<char>> canvas;
+    vector<string> menuItems;
 
+    size_t yStart;
+    size_t xStart;
 
 public:
-    Screen() {
-        canvas = generateCanvas(canvas);
-    }
 
-    virtual void render() {}
+    virtual void render() {
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ESC):
+                screenId = ScreenIds::MENU;
+                break;
+        }
+    };
 
     virtual void update() {
+#ifdef _WIN32
+        cout << CLEAR_CODE;
+#endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
                 if (canvas[i][j]) {
@@ -117,83 +157,105 @@ public:
     }
 
 protected:
+    void configureScreen() {
+        canvas = generateCanvas();
+        fillMenuItems();
+        calculateCords();
+        drawMenuItems();
+    }
 
-    static vector<vector<char>> generateCanvas(vector<vector<char>> canvas1) {
+    static vector<vector<char>> generateCanvas() {
+        vector<vector<char>> canvas1;
         canvas1.resize(SCREEN_HEIGHT);
         for (auto &i: canvas1) i.resize(SCREEN_WIDTH);
         return canvas1;
     }
-};
 
-class Menu : public Screen {
-private:
-    int point = 1;
-    const vector<string> menu_items{
-            "Menu",
-            "1.  Table    ",
-            "2.  Graphics ",
-            "3.  Equation ",
-            "4.  Integrals",
-            "5.  Animation",
-            "6.  Author   ",
-            "7.  Exit     ",
-    };
-
-    const size_t yStart = (SCREEN_HEIGHT - menu_items.size()) / 2;
-    const size_t xStart = (SCREEN_WIDTH - menu_items[1].size()) / 2;
-
-    size_t yPoint = yStart + point;
-    const size_t xPoint = xStart - 2;
-
-public:
-    Menu() {
-        drawMenuItems();
-    }
-
-    void render() override {
-        checkPointPosition();
-        Screen::update();
-        while (true) {
-            switch (Buttons::getKeyCode()) {
-                case (Buttons::Keys::ARROW_DOWN):
-                    movePointDown();
-                    break;
-                case (Buttons::Keys::ARROW_UP):
-                    movePointUp();
-                    break;
-                case (Buttons::Keys::ENTER):
-
-                    break;
+    virtual void drawMenuItems() {
+        for (int i = 0; i < menuItems.size(); i++) {
+            for (int j = 0; j < menuItems[i].size(); j++) {
+                canvas[i + yStart][j + xStart] = menuItems[i][j];
             }
         }
     }
 
+    virtual void fillMenuItems() {};
+
 private:
+    virtual void calculateCords() {
+        yStart = (SCREEN_HEIGHT - menuItems.size()) / 2;
+        xStart = (SCREEN_WIDTH - menuItems[1].size()) / 2;
+    }
+};
+
+
+class Menu : public Screen {
+protected:
+    void fillMenuItems() override {
+        menuItems = {
+                "Menu         ",
+                "1.  Table    ",
+                "2.  Graphics ",
+                "3.  Equation ",
+                "4.  Integrals",
+                "5.  Animation",
+                "6.  Author   ",
+                "7.  Exit     ",
+        };
+    }
+
+private:
+    int point = 1;
+
+    size_t yPoint;
+    size_t xPoint;
+
+public:
+    Menu() {
+        configureScreen();
+        yPoint = yStart + point;
+        xPoint = xStart - 2;
+        canvas[yPoint][xPoint] = '*';
+    }
+
+    void render() override {
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ARROW_DOWN):
+                movePointDown();
+                break;
+            case (Buttons::Keys::ARROW_UP):
+                movePointUp();
+                break;
+            case (Buttons::Keys::ENTER):
+                screenId = static_cast<ScreenIds>(point);
+                break;
+        }
+    }
+
+    void update() override {
+        checkPointPosition();
+        Screen::update();
+    }
+
     void movePointDown() {
         if (point < 7) point++;
         else point = 1;
+        update();
     }
 
     void movePointUp() {
         if (point > 1) point--;
         else point = 7;
+        update();
     }
 
+private:
     void checkPointPosition() {
         if (yStart + point != yPoint) {
             canvas[yPoint][xPoint] = ' ';
             yPoint = yStart + point;
             canvas[yPoint][xPoint] = '*';
         }
-    }
-
-    void drawMenuItems() {
-        for (int i = 0; i < menu_items.size(); i++) {
-            for (int j = 0; j < menu_items[i].size(); j++) {
-                canvas[i + yStart][j + xStart] = menu_items[i][j];
-            }
-        }
-        canvas[yPoint][xPoint] = '*';
     }
 };
 
@@ -211,19 +273,26 @@ private:
         return 10 / (2 + x * x);
     }
 
+protected:
+    void fillMenuItems() override {
+        menuItems.emplace_back("_____________________________________________");
+        menuItems.emplace_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
+        menuItems.emplace_back("|___________________________________________|");
+        for (int i = 0; i < N; i++) {
+            if (i < 9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
+            else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
+        }
+        menuItems.emplace_back("|___________________________________________|");
 
+        Screen::fillMenuItems();
+    }
+
+private:
     const double dX = fabs(B - A) / (N - 1.0);
-    size_t yStart;
-    size_t xStart;
-    vector<string> menuItems;
 
 public:
     Table() {
-        fillMenuItems();
-        yStart = (SCREEN_HEIGHT - menuItems.size()) / 2;
-        xStart = (SCREEN_WIDTH - menuItems[0].size()) / 2;
-        drawMenuItems();
-
+        configureScreen();
         drawAnswers();
     }
 
@@ -295,41 +364,28 @@ private:
             if (F[i] < min1)min1 = F[i];
         return min1;
     }
-
-    void fillMenuItems() {
-        menuItems.emplace_back("_____________________________________________");
-        menuItems.emplace_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
-        menuItems.emplace_back("|___________________________________________|");
-        for (int i = 0; i < N; i++) {
-            if (i < 9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
-            else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
-        }
-        menuItems.emplace_back("|___________________________________________|");
-    }
-
-    void drawMenuItems() {
-        for (int i = 0; i < menuItems.size(); i++) {
-            for (int j = 0; j < menuItems[i].size(); j++) {
-                canvas[i + yStart][j + xStart] = menuItems[i][j];
-            }
-        }
-    }
 };
 
 class Graphic : public Screen {
 
 private:
     static double function(double x) {
-        return sin(x);
+        return x*x;
     }
 
-    const double xScale = SCREEN_WIDTH / (2 * M_PI);
-    const double yScale = SCREEN_HEIGHT / 2.0;
+    const double xScale = SCREEN_WIDTH / (4 * M_PI);
+    const double yScale = SCREEN_HEIGHT / 4.0;
 
 public:
     Graphic() {
+        canvas = generateCanvas();
         drawCoordinates();
         drawGraphic();
+    }
+
+protected:
+    void fillMenuItems() override {
+        menuItems = {" "};
     }
 
 private:
@@ -345,10 +401,10 @@ private:
     }
 
     void drawGraphic() {
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y = static_cast<int>(round(function(radians) * yScale)) + SCREEN_HEIGHT / 2;
-            canvas[y][x] = '*';
+            y < canvas.size() ? canvas[y][x] = '*' : x++;
         }
     }
 };
@@ -363,23 +419,23 @@ private:
         return pow(x, 3) + 3 * x + 2;
     }
 
-    vector<string> menuItems{
-            "____________________________________________________",
-            "| Equation x^3 + 3x + 2 = 0 on the segment [0,4]   |",
-            "----------------------------------------------------",
-            "----------------------------------------------------",
-            "| Bisection method:                                |",
-            "----------------------------------------------------",
-    };
-
-
-    const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
-    const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
-
 public:
     Equation() {
-        drawMenuItems();
+        configureScreen();
         drawAnswers();
+    }
+
+
+protected:
+    void fillMenuItems() override {
+        menuItems = {
+                "____________________________________________________",
+                "| Equation x^3 + 3x + 2 = 0 on the segment [0,4]   |",
+                "----------------------------------------------------",
+                "----------------------------------------------------",
+                "| Bisection method:                                |",
+                "----------------------------------------------------",
+        };
     }
 
 private:
@@ -395,10 +451,10 @@ private:
         return x;
     }
 
-    void drawMenuItems() {
+    void drawMenuItems() override {
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
-                canvas[i + y_start][j + x_start] = menuItems[i][j];
+                canvas[i + yStart][j + xStart] = menuItems[i][j];
             }
         }
     }
@@ -409,7 +465,7 @@ private:
         int k = 0;
         for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {
-                canvas[i + y_start][j + x_start] = answers[k][j - 35];
+                canvas[i + yStart][j + xStart] = answers[k][j - 35];
             }
             k += 1;
         }
@@ -427,26 +483,26 @@ private:
         return cos(x) * pow(M_E, x);
     }
 
-    vector<string> menuItems{
-            "--------------------------------------------",
-            "| cos(x) * pow(e, x) on the segment [1,5]: |",
-            "--------------------------------------------",
-            "--------------------------------------------",
-            "| Rectangle method:                        |",
-            "--------------------------------------------",
-            "--------------------------------------------",
-            "| Trapeze method:                          |",
-            "--------------------------------------------",
-    };
+protected:
+    void fillMenuItems() override {
+        menuItems = {
+                "--------------------------------------------",
+                "| cos(x) * pow(e, x) on the segment [1,5]: |",
+                "--------------------------------------------",
+                "--------------------------------------------",
+                "| Rectangle method:                        |",
+                "--------------------------------------------",
+                "--------------------------------------------",
+                "| Trapeze method:                          |",
+                "--------------------------------------------",
+        };
+    }
 
-
-    const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
-    const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
     const double H = fabs(B - A) / N;
 
 public:
     Integrals() {
-        drawMenuItems();
+        configureScreen();
         drawAnswers();
     }
 
@@ -463,15 +519,6 @@ private:
         return s;
     }
 
-    void drawMenuItems() {
-        for (int i = 0; i < menuItems.size(); i++) {
-
-            for (int j = 0; j < menuItems[i].size(); j++) {
-                canvas[i + y_start][j + x_start] = menuItems[i][j];
-            }
-        }
-    }
-
     void drawAnswers() {
         string answers[2];
         answers[0] = to_string(trapezeMethod());
@@ -479,65 +526,90 @@ private:
         int k = 0;
         for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {
-                canvas[i + y_start][j + x_start] = answers[k][j - 35];
+                canvas[i + yStart][j + xStart] = answers[k][j - 35];
             }
             k += 1;
         }
     }
 };
 
+
+static auto previousAnimationTime = std::chrono::system_clock::now();
+
 class Animation : public Screen {
 
 private:
-    const int delay = 150;
+    const int delay = 650;
+    vector<vector<string>> framesStr{
+            {
+                    "  /\\  ",
+                    " /__\\ ",
+                    "/    \\",
+            },
+            {
+                    "|    |",
+                    "|----|",
+                    "|    |",
+            },
+            {
+                    "|  /| ",
+                    "| / | ",
+                    "|/  | ",
+            },
+            {
+                    "|\\  /| ",
+                    "| \\/ | ",
+                    "|    | ",
+            },
+            {
+                    "  /\\  ",
+                    " /__\\ ",
+                    "/    \\",
+            },
+            {
+                    "|   | ",
+                    "|___|_",
+                    "     |",
+            },
+            {
+                    "|  /| ",
+                    "| / | ",
+                    "|/  | ",
+            },
+            {
+                    "|---| ",
+                    "|___| ",
+                    "  / | ",
+            },
+    };
 
 
     vector<vector<vector<char>>> frames;
     int frame = 0;
     bool isGoing = false;
 
-    vector<vector<string>> framesStr{
-            {
-                    "  |    |  ",
-                    "  |    |  ",
-                    "()|()()|()",
-            },
-            {
-                    "          ",
-                    "  |    |  ",
-                    "()|()()|()",
-            },
-            {
-                    "          ",
-                    "          ",
-                    "()|()()|()",
-            },
-            {
-                    "          ",
-                    "  |    |  ",
-                    "()|()()|()",
-            },
-            {
-                    "          ",
-                    "  |    |  ",
-                    "()|()()|()",
-            },
-    };
-
-    const size_t y_start = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
-    const size_t x_start = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
-
 public:
     Animation() {
         frames.resize(framesStr.size());
-        for (int i = 0; i < frames.size(); i++) frames[i] = generateCanvas(frames[i]);
+        for (int i = 0; i < frames.size(); i++) frames[i] = generateCanvas();
+        yStart = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
+        xStart = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
         drawFrames();
     }
 
     void update() override {
         canvas = getFrame();
         Screen::update();
-        Sleep(delay);
+    }
+
+    void render() override {
+        auto now = std::chrono::system_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() -
+            delay > 0) {
+            update();
+            previousAnimationTime = now;
+        }
+        Screen::render();
     }
 
 private:
@@ -551,7 +623,7 @@ private:
         for (int k = 0; k < framesStr.size(); ++k) {
             for (int i = 0; i < framesStr[k].size(); i++) {
                 for (int j = 0; j < framesStr[k][i].size(); j++) {
-                    frames[k][i + y_start][j + x_start] = framesStr[k][i][j];
+                    frames[k][i + yStart][j + xStart] = framesStr[k][i][j];
                 }
             }
         }
@@ -559,74 +631,66 @@ private:
 };
 
 class Author : public Screen {
-private:
-    vector<string> menuItems{
-            R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \)",
-            "RGR for programming                                        ",
-            "University: OmSTU                                          ",
-            "Faculty: FiTIKS                                            ",
-            "Group: PI-232                                              ",
-            "kizyakin kizyak kizyakovich                                ",
-            R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /)",
-    };
-
-
-
-    const size_t y_start = (SCREEN_HEIGHT - menuItems.size()) / 2;
-    const size_t x_start = (SCREEN_WIDTH - menuItems[0].size()) / 2;
+protected:
+    void fillMenuItems() override {
+        menuItems = {
+                R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \)",
+                "RGR for programming                                        ",
+                "University: OmSTU                                          ",
+                "Faculty: FiTIKS                                            ",
+                "Group: PI-232                                              ",
+                "kizyakin kizyak kizyakovich                                ",
+                R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /)",
+        };
+    }
 
 public:
     Author() {
-        drawMenuItems();
-    }
-
-private:
-    void drawMenuItems() {
-        for (int i = 0; i < menuItems.size(); i++) {
-            for (int j = 0; j < menuItems[i].size(); j++) {
-                canvas[i + y_start][j + x_start] = menuItems[i][j];
-            }
-        }
+        configureScreen();
     }
 };
 
-class App {
-public:
-    static const Menu menu;
-    static const Table table;
-    static const Graphic graphic;
-    static const Equation equation;
-    static const Integrals integrals;
-    static const Animation animation;
-    static const Author author;
 
-    App() {
-        configure();
-    }
-
-    static void setScreen(Screen screen) {
-        screen.render();
-    }
-
-private:
-    static void configure() {
-        ios::sync_with_stdio(false);
-        cin.tie(nullptr);
+static void configure() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 #ifdef _WIN32
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
-        SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
+    SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
 #else
-        struct winsize size{};
+    struct winsize size{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
         SCREEN_HEIGHT = size.ws_row;
         SCREEN_WIDTH = size.ws_col;
 #endif
-    }
-};
+}
+
 
 int main() {
-    App app;
-    App::setScreen(App::menu);
+    Screen *screens[7];
+
+    configure();
+
+    screens[0] = new Menu;
+    screens[1] = new Table;
+    screens[2] = new Graphic;
+    screens[3] = new Equation;
+    screens[4] = new Integrals;
+    screens[5] = new Animation;
+    screens[6] = new Author;
+
+    ScreenIds preId = ScreenIds::TABLE;
+
+    while (screenId != ScreenIds::EXIT) {
+        if (screenId != preId) {
+            screens[screenId]->update();
+            preId = screenId;
+        }
+        screens[screenId]->render();
+    }
+
+    for (int i = 0; i < 7; i++) delete screens[i];
+    return 0;
 }

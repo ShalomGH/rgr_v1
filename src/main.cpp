@@ -651,10 +651,10 @@ protected:
                 "| Trapeze method:                          |",
                 "--------------------------------------------",
                 "--------------------------------------------",
-                "| Monte Carlo method:                      |",
-                "--------------------------------------------",
-                "--------------------------------------------",
                 "| Gauss method:                            |",
+                "--------------------------------------------",
+                "--------------------------------------------",
+                "| Monte Carlo method:                      |",
                 "--------------------------------------------",
                 "--------------------------------------------",
                 "| Finite Difference method:                |",
@@ -692,12 +692,13 @@ private:
     }
 
     [[nodiscard]] double monteCarloMethod() {
+        const int n =  N*100;
         double sum = 0.0;
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < n; i++) {
             double x = A + static_cast<double>(rand()) / RAND_MAX * (B - A);
             sum += function(x);
         }
-        return (B - A) * sum / N;
+        return (B - A) * sum / n;
     }
 
     [[nodiscard]] double finiteDifferenceMethod() {

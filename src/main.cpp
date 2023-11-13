@@ -720,6 +720,7 @@ static void configure() {
 }
 
 
+
 int main() {
     Screen *screens[7];
 

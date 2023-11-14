@@ -484,8 +484,8 @@ private:
 
 class Equation : public Screen {
 private:
-    int A = NAN;
-    int B = NAN;
+    int A = 1;
+    int B = 4;
     const double e = 0.001;
 
     static double function(double x) {
@@ -521,30 +521,9 @@ public:
 //                screenId = ScreenIds::MENU;
 //                break;
         }
-        if (isnan(A)) getAFromUser();
-        if (!isnan(A) && isnan(B)) getBFromUser();
     }
 
 private:
-    void getAFromUser() {
-        const string a = "Print A: ";
-        for (int i = 0; i < a.size(); i++) canvas[SCREEN_HEIGHT - 1][i] = a[i];
-        update();
-        cin >> A;
-        drawMenuItems();
-        update();
-    }
-
-    void getBFromUser() {
-        const string a = "Print B: ";
-        for (int i = 0; i < a.size(); i++) canvas[SCREEN_HEIGHT - 1][i] = a[i];
-        update();
-        cin >> B;
-        for (int i = 0; i < a.size(); i++) canvas[SCREEN_HEIGHT - 1][i] = ' ';
-        drawMenuItems();
-        drawAnswers();
-        update();
-    }
 
     [[nodiscard]] double bisectionMethod() const {
         double a = A;
@@ -559,19 +538,11 @@ private:
     }
 
     void drawMenuItems() override {
-        if (!isnan(A)) {
-            if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
-            menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
-        }
-        if (!isnan(B)) {
-            if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
-            menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
-        }
-        for (int i = 0; i < menuItems.size(); i++) {
-            for (int j = 0; j < menuItems[i].size(); j++) {
-                canvas[i + yStart][j + xStart] = menuItems[i][j];
-            }
-        }
+        if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
+        menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
+        if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
+        menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
+        Screen::drawMenuItems();
     }
 
     void drawAnswers() {
@@ -602,23 +573,23 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "--------------------------------------------",
-                "| cos(x) * pow(e, x) on the segment [1,5]: |",
-                "--------------------------------------------",
-                "--------------------------------------------",
-                "| Rectangle method:                        |",
-                "--------------------------------------------",
-                "--------------------------------------------",
-                "| Trapeze method:                          |",
-                "--------------------------------------------",
-                "--------------------------------------------",
-                "| Gauss method:                            |",
-                "--------------------------------------------",
-                "--------------------------------------------",
-                "| Monte Carlo method:                      |",
-                "--------------------------------------------",
-                "--------------------------------------------",
-                "| Finite Difference method:                |",
-                "--------------------------------------------",
+                "| cos(x) * pow(e, x) on the segment [  ,  ] |",
+                "---------------------------------------------",
+                "---------------------------------------------",
+                "| Rectangle method:                         |",
+                "---------------------------------------------",
+                "---------------------------------------------",
+                "| Trapeze method:                           |",
+                "---------------------------------------------",
+                "---------------------------------------------",
+                "| Gauss method:                             |",
+                "---------------------------------------------",
+                "---------------------------------------------",
+                "| Monte Carlo method:                       |",
+                "---------------------------------------------",
+                "---------------------------------------------",
+                "| Finite Difference method:                 |",
+                "---------------------------------------------",
         };
     }
 
@@ -682,6 +653,14 @@ private:
             sum += function(A + (i + 0.5) * h);
         }
         return h * sum;
+    }
+
+    void drawMenuItems() override {
+        if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
+        menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
+        if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
+        menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
+        Screen::drawMenuItems();
     }
 
 
@@ -810,6 +789,8 @@ protected:
                 " Zagarov Svyatoslav Alekseevich                            ",
                 R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    )",
         };
+
+
         menuItems[0].insert(0, 1, Color::GREEN);
         menuItems[1].insert(0, 1, Color::MAGENTA);
         menuItems[menuItems.size() - 1].insert(0, 1, Color::GREEN);
@@ -831,8 +812,6 @@ static void configure() {
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     SCREEN_HEIGHT = csbi.srWindow.Bottom - csbi.srWindow.Top;
     SCREEN_WIDTH = csbi.srWindow.Right - csbi.srWindow.Left;
-    int a = /*csbi.srWindow.Bottom - */csbi.srWindow.Top;
-    int b = SCREEN_HEIGHT;
 #else
     struct winsize size{};
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);

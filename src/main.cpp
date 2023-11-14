@@ -726,7 +726,7 @@ private:
 
 
     void drawAnswers() {
-        string answers[4];
+        string answers[5];
         answers[0] = to_string(trapezeMethod());
         answers[1] = to_string(rectangleMethod());
         answers[2] = to_string(gaussMethod());

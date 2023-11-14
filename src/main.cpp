@@ -4,7 +4,6 @@
 #include <cmath>
 #include <chrono>
 
-
 #define RESET_CODE   "\033[0m"
 #define GREEN_CODE   "\033[32m"      /* Green */
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
@@ -61,16 +60,6 @@ public:
         ARROW_DOWN,
         ENTER,
         ESC,
-//        ZERO,
-//        ONE,
-//        TWO,
-//        THREE,
-//        FOUR,
-//        FIVE,
-//        SIX,
-//        SEVEN,
-//        EIGHT,
-//        NINE,
     };
 
     static int getKeyCode() {
@@ -91,59 +80,27 @@ public:
         } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша Enter
             previousButtonsTime = now;
             return ENTER;
-        }  /*else if (GetAsyncKeyState(0x30) & 0x8000) {  // Клавиша 0
-            previousButtonsTime = now;
-            return ZERO;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 1
-            previousButtonsTime = now;
-            return ONE;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 2
-            previousButtonsTime = now;
-            return TWO;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 3
-            previousButtonsTime = now;
-            return THREE;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 4
-            previousButtonsTime = now;
-            return FOUR;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 5
-            previousButtonsTime = now;
-            return FIVE;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 6
-            previousButtonsTime = now;
-            return SIX;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 7
-            previousButtonsTime = now;
-            return SEVEN;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 8
-            previousButtonsTime = now;
-            return EIGHT;
-        } else if (GetAsyncKeyState(VK_RETURN) & 0x8000) {  // Клавиша 9
-            previousButtonsTime = now;
-            return NINE;
-        }*/
+        }
+        return NOTHING;
 #else
-        char input = getch();
+        int input = getch();
         switch (input) {
             case 65: // up
-            previousButtonsTime = baseButtonsDelay;
+                previousButtonsTime = now;
                 return ARROW_UP;
-                break;
             case 66: // down
-            previousButtonsTime = baseButtonsDelay;
+                previousButtonsTime = now;
                 return ARROW_DOWN;
-                break;
-            case 13: // enter
-            previousButtonsTime = baseButtonsDelay;
+            case 10: // enter
+                previousButtonsTime = now;
                 return ENTER;
-                break;
-            case 27: //esc
-            previousButtonsTime = baseButtonsDelay;
+            case 9: // esc (tab)
+                previousButtonsTime = now;
                 return ESC;
             default:
-                break;
+                return NOTHING;
+        }
 #endif
-        return NOTHING;
     }
 };
 
@@ -319,7 +276,8 @@ protected:
         menuItems.emplace_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
         menuItems.emplace_back("|___________________________________________|");
         for (int i = 0; i < N; i++) {
-            if (i < 9) menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
+            if (i < 9)
+                menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
             else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
         }
         menuItems.emplace_back("|___________________________________________|");
@@ -366,11 +324,13 @@ private:
             for (int j = 0; j < 6; j++) {
                 canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
                 canvas[i + yStart][21 + xStart] =
-                        (XF1F2[1][i - 3] == maxF1) ? Color::GREEN : (XF1F2[1][i - 3] == minF1) ? Color::MAGENTA : ' ';
+                        (XF1F2[1][i - 3] == maxF1) ? Color::GREEN : (XF1F2[1][i - 3] == minF1) ? Color::MAGENTA
+                                                                                               : ' ';
                 canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
                 canvas[i + yStart][22 + 6 + xStart] = Color::RESET;
                 canvas[i + yStart][32 + xStart] =
-                        (XF1F2[2][i - 3] == maxF2) ? Color::GREEN : (XF1F2[2][i - 3] == minF2) ? Color::MAGENTA : ' ';
+                        (XF1F2[2][i - 3] == maxF2) ? Color::GREEN : (XF1F2[2][i - 3] == minF2) ? Color::MAGENTA
+                                                                                               : ' ';
                 canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
                 canvas[i + yStart][33 + 6 + xStart] = Color::RESET;
                 k++;
@@ -683,7 +643,7 @@ private:
         return s;
     }
 
-    [[nodiscard]] double gaussMethod() {
+    [[nodiscard]] double gaussMethod() const {
         double *weights = new double[N];
         double *nodes = new double[N];
 
@@ -875,9 +835,9 @@ static void configure() {
     int b = SCREEN_HEIGHT;
 #else
     struct winsize size{};
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-        SCREEN_HEIGHT = size.ws_row;
-        SCREEN_WIDTH = size.ws_col;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+    SCREEN_HEIGHT = size.ws_row - 1;
+    SCREEN_WIDTH = size.ws_col;
 #endif
 }
 
@@ -907,5 +867,4 @@ int main() {
 
     for (auto &screen: screens) delete screen;
     exit(1);
-    return 0;
 }

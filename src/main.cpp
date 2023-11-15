@@ -625,14 +625,16 @@ private:
             weights[i] = M_PI / (N + 0.5) * (1.0 - nodes[i] * nodes[i]);
         }
 
-        double a = 0.5 * (B - A);
-        double b = 0.5 * (B + A);
+        double a = 0.5 * fabs(B - A);
+        double b = 0.5 * fabs(B + A);
 
         for (int i = 0; i < N; ++i) {
             double xi = a * nodes[i] + b;
             integral += weights[i] * function(xi);
         }
         integral *= A;
+        delete[] weights;
+        delete[] nodes;
         return integral * 2 - 1.5;
     }
 
@@ -689,65 +691,10 @@ class Animation : public Screen {
 
 private:
     const int delay = 650;
-    vector<vector<string>> framesStr{
-            {
-                    "  /\\   ",
-                    " /__\\  ",
-                    "/    \\ ",
-            },
-            {
-                    "|    |",
-                    "|----|",
-                    "|    |",
-            },
-            {
-                    "|  /| ",
-                    "| / | ",
-                    "|/  | ",
-            },
-            {
-                    "|\\  /| ",
-                    "| \\/ | ",
-                    "|    | ",
-            },
-            {
-                    "  /\\  ",
-                    " /__\\ ",
-                    "/    \\",
-            },
-            {
-                    "|   | ",
-                    "|___|_",
-                    "     |",
-            },
-            {
-                    "|  /| ",
-                    "| / | ",
-                    "|/  | ",
-            },
-            {
-                    "|---| ",
-                    "|___| ",
-                    "  / | ",
-            },
-    };
-
-
-    vector<vector<vector<char>>> frames;
-    int frame = 0;
 
 public:
     Animation() {
-        frames.resize(framesStr.size());
-        for (auto &fr: frames) fr = generateCanvas();
-        yStart = (SCREEN_HEIGHT - framesStr[0].size()) / 2;
-        xStart = (SCREEN_WIDTH - framesStr[0][0].size()) / 2;
-        drawFrames();
-    }
-
-    void update() override {
-        canvas = getFrame();
-        Screen::update();
+        configureScreen();
     }
 
     void render() override {
@@ -762,19 +709,15 @@ public:
 
 private:
 
-    vector<vector<char>> getFrame() {
-        (frame < frames.size() - 1) ? frame++ : frame = 0;
-        return frames[frame];
-    }
 
-    void drawFrames() {
-        for (int k = 0; k < framesStr.size(); ++k) {
-            for (int i = 0; i < framesStr[k].size(); i++) {
-                for (int j = 0; j < framesStr[k][i].size(); j++) {
-                    frames[k][i + yStart][j + xStart] = framesStr[k][i][j];
-                }
-            }
-        }
+    void fillMenuItems() override{
+        menuItems = {
+                " _________________________    ",
+                "|   |     |     |    | |  \\   ",
+                "|___|_____|_____|____|_|___\\  ",
+                "|                    | |    \\ ",
+                "`--(o)(o)--------------(o)--' ",
+        };
     }
 };
 

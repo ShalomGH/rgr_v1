@@ -171,7 +171,13 @@ protected:
     virtual void drawMenuItems() {
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
-                canvas[i + yStart][j + xStart] = menuItems[i][j];
+                if (
+                        i + yStart < canvas.size() &&
+                        i + yStart >= 0 &&
+                        j + xStart < canvas[0].size() &&
+                        j + xStart >= 0
+                        )
+                    canvas[i + yStart][j + xStart] = menuItems[i][j];
             }
         }
     }
@@ -690,17 +696,21 @@ static auto previousAnimationTime = std::chrono::system_clock::now();
 class Animation : public Screen {
 
 private:
-    const int delay = 650;
+    const int delay = 25;
+    const vector<vector<char>> voidCanvas = generateCanvas();
 
 public:
     Animation() {
         configureScreen();
+        xStart = 0;
     }
 
     void render() override {
         auto now = std::chrono::system_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() -
             delay > 0) {
+            canvas = voidCanvas;
+            moveDrawing();
             update();
             previousAnimationTime = now;
         }
@@ -708,14 +718,18 @@ public:
     }
 
 private:
+    void moveDrawing() {
+        if (xStart < SCREEN_WIDTH - 1 || xStart > 0 - menuItems[0].size()-1) xStart++;
+        else xStart = 0 - menuItems[0].size();
+        drawMenuItems();
+    }
 
-
-    void fillMenuItems() override{
+    void fillMenuItems() override {
         menuItems = {
                 " _________________________    ",
-                "|   |     |     |    | |  \\   ",
-                "|___|_____|_____|____|_|___\\  ",
-                "|                    | |    \\ ",
+                "|   |     |     |    | |  \\  ",
+                "|___|_____|_____|____|_|___\\ ",
+                "|                    | |    \\",
                 "`--(o)(o)--------------(o)--' ",
         };
     }

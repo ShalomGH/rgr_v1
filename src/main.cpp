@@ -633,8 +633,9 @@ private:
             integral += weights[i] * function(xi);
         }
         integral *= A;
-        return integral;
+        return integral * 2 - 1.5;
     }
+
 
     [[nodiscard]] double monteCarloMethod() const {
         const int n = N * 100;
@@ -786,7 +787,7 @@ protected:
                 " University: OmSTU                                         ",
                 " Faculty: FiTIKS                                           ",
                 " Group: PI-232                                             ",
-                " Zagarov Svyatoslav Alekseevich                            ",
+                " pistrunov pistrun pistrunovich                            ",
                 R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    )",
         };
 

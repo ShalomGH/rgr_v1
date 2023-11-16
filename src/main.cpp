@@ -548,16 +548,12 @@ private:
 
     [[nodiscard]] double chordMethod(double a, double b) const {
         double x_next = 0;
-        double tmp;
-
-        do {
-            tmp = x_next;
-            x_next = b - function(b) * (a - b) / (function(a) - function(b));
-            a = b;
-            b = tmp;
-        } while (abs(x_next - b) > e);
-
-        return x_next;
+        while(fabs(function(b)) > e)
+        {
+            a = b - ((b - a) * function(b))/(function(b) - function(a));
+            b = a - ((a - b) * function(a))/(function(a) - function(b));
+        }
+        return b;
     }
 
     void drawMenuItems() override {

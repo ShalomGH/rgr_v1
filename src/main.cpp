@@ -514,6 +514,9 @@ protected:
                 "----------------------------------------------------",
                 "| Bisection method:                                |",
                 "----------------------------------------------------",
+                "----------------------------------------------------",
+                "| Iteration method:                                |",
+                "----------------------------------------------------",
         };
     }
 
@@ -543,6 +546,15 @@ private:
         return x;
     }
 
+    [[nodiscard]] double iterationMethod() const {
+        double x0 = A, x1 = B;
+        while (fabs(x1 - x0) >= e) {
+            x1 = exp(1.0/(4.0*(1+sqrt(x0))));
+            x0 = x1;
+        }
+        return x1;
+    }
+
     void drawMenuItems() override {
         if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
         menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
@@ -552,8 +564,9 @@ private:
     }
 
     void drawAnswers() {
-        string answers[1];
+        string answers[2];
         answers[0] = to_string(bisectionMethod());
+        answers[1] = to_string(iterationMethod());
         int k = 0;
         for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {

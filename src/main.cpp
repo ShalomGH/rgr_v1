@@ -489,7 +489,7 @@ private:
 
 class Equation : public Screen {
 private:
-    int A = 1;
+    int A = -1;
     int B = 4;
     const double e = 0.001;
 
@@ -537,13 +537,14 @@ private:
         double a = A;
         double b = B;
         double x = 0;
-        while ((b - a) >= e) {
+        while ((b - a) >  e) {
             x = (a + b) / 2;
+            if (function(a) * function(b) > 0) return 404;
             if (function(x) * function(a) == 0) return x;
-            if (function(x) * function(a) < 0) b = x;
-            else a = x;
+            if (function(x) * function(a) > 0) a = x;
+            else b = x;
         }
-        return x;
+        return (a+b)/2;
     }
 
     [[nodiscard]] double chordMethod(double a, double b) const {
@@ -557,10 +558,12 @@ private:
     }
 
     void drawMenuItems() override {
-        if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
-        menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
-        if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
-        menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
+        if (A < 0) menuItems[1][menuItems[1].size() - 8] = '-';
+        if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = abs(A) / 10 + '0';
+        menuItems[1][menuItems[1].size() - 7] = abs(A) % 10 + '0';
+        if (B < 0) menuItems[1][menuItems[1].size() - 5] = '-';
+        if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = abs(B) / 10 + '0';
+        menuItems[1][menuItems[1].size() - 4] = abs(B) % 10 + '0';
         Screen::drawMenuItems();
     }
 

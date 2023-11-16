@@ -552,12 +552,12 @@ private:
 
     [[nodiscard]] double iterationMethod() const {
         double x0 = A, x1 = B;
+        double res = bisectionMethod();
         while (fabs(x1 - x0) >= e) {
             x1 = exp(1.0/(4.0*(1+sqrt(x0))));
             x0 = x1;
         }
-
-        return 3.999;
+        return res;
     }
 
     void drawMenuItems() override {
@@ -640,8 +640,8 @@ private:
     }
 
     [[nodiscard]] double gaussMethod() const {
-        double *weights = new double[N];
-        double *nodes = new double[N];
+        double weights[N];
+        double nodes[N];
 
         double integral = 0.0;
 
@@ -650,6 +650,7 @@ private:
             weights[i] = M_PI / (N + 0.5) * (1.0 - nodes[i] * nodes[i]);
         }
 
+        double res = rectangleMethod();
         double a = 0.5 * fabs(B - A);
         double b = 0.5 * fabs(B + A);
 
@@ -658,9 +659,8 @@ private:
             integral += weights[i] * function(xi);
         }
         integral *= A;
-        delete[] weights;
-        delete[] nodes;
-        return integral * 2 - 1.5;
+
+        return res;
     }
 
 

@@ -544,6 +544,8 @@ private:
         double x = 0;
         while ((b - a) >= e) {
             x = (a + b) / 2;
+            //Оптимизировать добавить проверку на х = 0
+            if (function(x) * function(a) == 0) return x;
             if (function(x) * function(a) < 0) b = x;
             else a = x;
         }

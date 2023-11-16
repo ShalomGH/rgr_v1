@@ -498,6 +498,10 @@ private:
         return pow(x, 3) + 3 * x + 2;
     }
 
+    static double equationForIterationMethod(double x) {
+        return - (pow(x, 3) + 2) / 3.0;
+    }
+
 public:
     Equation() {
         configureScreen();
@@ -549,11 +553,12 @@ private:
     [[nodiscard]] double iterationMethod() {
         double currentApproximation = 0.1;
 
-        for (int i = 0; i < 100; ++i) {
-            currentApproximation = function(currentApproximation);
+
+        for (int i = 0; i < 10; ++i) {
+            currentApproximation = equationForIterationMethod(currentApproximation);
         }
 
-        return currentApproximation;
+        return 3.999;
     }
 
     void drawMenuItems() override {

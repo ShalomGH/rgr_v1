@@ -549,7 +549,7 @@ private:
     [[nodiscard]] double iterationMethod() const {
         double x0 = A, x1 = B;
         while (fabs(x1 - x0) >= e) {
-            x1 = exp(1.0/(4.0*(1+sqrt(x0))));
+            x1 = exp(1.0 / (4.0 * (1 + sqrt(x0))));
             x0 = x1;
         }
         return x1;
@@ -610,6 +610,7 @@ protected:
                 "| Finite Difference method:                 |",
                 "---------------------------------------------",
         };
+        menuItems.push_back("  e = " + to_string(e));
     }
 
     const double H = fabs(B - A) / N;
@@ -682,6 +683,7 @@ private:
         menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
         if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
         menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
+
         Screen::drawMenuItems();
     }
 
@@ -732,7 +734,7 @@ public:
 
 private:
     void moveDrawing() {
-        if (xStart < SCREEN_WIDTH - 1 || xStart > 0 - menuItems[0].size()-1) xStart++;
+        if (xStart < SCREEN_WIDTH - 1 || xStart > 0 - menuItems[0].size() - 1) xStart++;
         else xStart = 0 - menuItems[0].size();
         drawMenuItems();
     }

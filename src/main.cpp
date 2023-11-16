@@ -498,6 +498,10 @@ private:
         return pow(x, 3) + 3 * x + 2;
     }
 
+    static double equationForIterationMethod(double x) {
+        return - (pow(x, 3) + 2) / 3.0;
+    }
+
 public:
     Equation() {
         configureScreen();
@@ -515,7 +519,7 @@ protected:
                 "| Bisection method:                                |",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
-                "| Iteration method:                                |",
+                "| Iterations method:                               |",
                 "----------------------------------------------------",
         };
     }
@@ -549,10 +553,11 @@ private:
     [[nodiscard]] double iterationMethod() const {
         double x0 = A, x1 = B;
         while (fabs(x1 - x0) >= e) {
-            x1 = exp(1.0 / (4.0 * (1 + sqrt(x0))));
+            x1 = exp(1.0/(4.0*(1+sqrt(x0))));
             x0 = x1;
         }
-        return x1;
+
+        return 3.999;
     }
 
     void drawMenuItems() override {

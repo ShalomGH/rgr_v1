@@ -515,7 +515,7 @@ protected:
                 "| Bisection method:                                |",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
-                "| Iteration method:                                |",
+                "| Iterations method:                               |",
                 "----------------------------------------------------",
         };
     }
@@ -546,13 +546,14 @@ private:
         return x;
     }
 
-    [[nodiscard]] double iterationMethod() const {
-        double x0 = A, x1 = B;
-        while (fabs(x1 - x0) >= e) {
-            x1 = exp(1.0/(4.0*(1+sqrt(x0))));
-            x0 = x1;
+    [[nodiscard]] double iterationMethod() {
+        double currentApproximation = 0.1;
+
+        for (int i = 0; i < 100; ++i) {
+            currentApproximation = function(currentApproximation);
         }
-        return x1;
+
+        return currentApproximation;
     }
 
     void drawMenuItems() override {

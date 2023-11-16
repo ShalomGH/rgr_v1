@@ -7,13 +7,13 @@
 #define RESET_CODE   "\033[0m"
 #define GREEN_CODE   "\033[32m"      /* Green */
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
+#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 
 #ifdef _WIN32
 
 #include <windows.h>
 
-#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 
 #else
@@ -716,7 +716,7 @@ static auto previousAnimationTime = std::chrono::system_clock::now();
 class Animation : public Screen {
 
 private:
-    const int delay = 25;
+    const int delay = 10;
     const vector<vector<char>> voidCanvas = generateCanvas();
 
 public:
@@ -823,5 +823,6 @@ int main() {
     }
 
     for (auto &screen: screens) delete screen;
+    cout << CLEAR_CODE;
     exit(1);
 }

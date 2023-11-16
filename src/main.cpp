@@ -15,7 +15,6 @@
 #include <windows.h>
 
 
-
 #else
 
 #include <sys/ioctl.h>
@@ -498,10 +497,6 @@ private:
         return pow(x, 3) + 3 * x + 2;
     }
 
-    static double equationForIterationMethod(double x) {
-        return - (pow(x, 3) + 2) / 3.0;
-    }
-
 public:
     Equation() {
         configureScreen();
@@ -519,7 +514,7 @@ protected:
                 "| Bisection method:                                |",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
-                "| Iterations method:                               |",
+                "| Chords method:                                   |",
                 "----------------------------------------------------",
         };
     }
@@ -551,14 +546,18 @@ private:
         return x;
     }
 
-    [[nodiscard]] double iterationMethod() const {
-        double x0 = A, x1 = B;
-        double res = bisectionMethod();
-        while (fabs(x1 - x0) >= e) {
-            x1 = exp(1.0/(4.0*(1+sqrt(x0))));
-            x0 = x1;
-        }
-        return res;
+    [[nodiscard]] double chordMethod(double a, double b) const {
+        double x_next = 0;
+        double tmp;
+
+        do {
+            tmp = x_next;
+            x_next = b - function(b) * (a - b) / (function(a) - function(b));
+            a = b;
+            b = tmp;
+        } while (abs(x_next - b) > e);
+
+        return x_next;
     }
 
     void drawMenuItems() override {
@@ -572,7 +571,7 @@ private:
     void drawAnswers() {
         string answers[2];
         answers[0] = to_string(bisectionMethod());
-        answers[1] = to_string(iterationMethod());
+        answers[1] = to_string(chordMethod(1.0, 4.0));
         int k = 0;
         for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {

@@ -497,6 +497,7 @@ private:
         return pow(x, 3) + 3 * x + 2;
     }
 
+
 public:
     Equation() {
         configureScreen();
@@ -548,13 +549,13 @@ private:
     }
 
     [[nodiscard]] double chordMethod(double a, double b) const {
-        double x_next = 0;
         while(fabs(function(b)) > e)
         {
             a = b - ((b - a) * function(b))/(function(b) - function(a));
             b = a - ((a - b) * function(a))/(function(a) - function(b));
         }
         return b;
+
     }
 
     void drawMenuItems() override {
@@ -599,7 +600,7 @@ protected:
                 "| cos(x) * pow(e, x) on the segment [  ,  ] |",
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Rectangle method:                         |",
+                "| Right Rectangle method:                   |",
                 "---------------------------------------------",
                 "---------------------------------------------",
                 "| Trapeze method:                           |",
@@ -611,7 +612,7 @@ protected:
                 "| Monte Carlo method:                       |",
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Finite Difference method:                 |",
+                "| Middle Rectangle method:                  |",
                 "---------------------------------------------",
         };
         menuItems.push_back("  e = " + to_string(e));
@@ -634,7 +635,7 @@ private:
 
     [[nodiscard]] double rectangleMethod() const {
         double s = 0;
-        for (double x = B; x > A; x -= e) s += function(x) * e;
+        for (float x = float(B); x > A; x -= e) s += function(x) * e;
         return s;
     }
 
@@ -673,7 +674,7 @@ private:
         return (B - A) * sum / n;
     }
 
-    [[nodiscard]] double finiteDifferenceMethod() const {
+    [[nodiscard]] double midRectangleMethod() const {
         double h = fabs(B - A) / N;
         double sum = 0.0;
         for (int i = 0; i < N; i++) {
@@ -694,11 +695,11 @@ private:
 
     void drawAnswers() {
         string answers[5];
-        answers[0] = to_string(trapezeMethod());
-        answers[1] = to_string(rectangleMethod());
+        answers[0] = to_string(rectangleMethod());
+        answers[1] = to_string(trapezeMethod());
         answers[2] = to_string(gaussMethod());
         answers[3] = to_string(monteCarloMethod());
-        answers[4] = to_string(finiteDifferenceMethod());
+        answers[4] = to_string(midRectangleMethod());
         int k = 0;
         for (int i = 4; i < menuItems.size(); i += 3) {
             for (int j = 35; j < 41; j++) {

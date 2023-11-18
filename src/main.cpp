@@ -537,22 +537,21 @@ private:
         double a = A;
         double b = B;
         double x = 0;
-        while ((b - a) >  e) {
+        while ((b - a) > e) {
             x = (a + b) / 2;
             if (function(a) * function(b) > 0) return 404;
             if (function(x) * function(a) == 0) return x;
             if (function(x) * function(a) > 0) a = x;
             else b = x;
         }
-        return (a+b)/2;
+        return (a + b) / 2;
     }
 
     [[nodiscard]] double chordMethod(double a, double b) const {
         double x_next = 0;
-        while(fabs(function(b)) > e)
-        {
-            a = b - ((b - a) * function(b))/(function(b) - function(a));
-            b = a - ((a - b) * function(a))/(function(a) - function(b));
+        while (fabs(function(b)) > e) {
+            a = b - ((b - a) * function(b)) / (function(b) - function(a));
+            b = a - ((a - b) * function(a)) / (function(a) - function(b));
         }
         return b;
     }
@@ -639,27 +638,17 @@ private:
     }
 
     [[nodiscard]] double gaussMethod() const {
-        double weights[N];
-        double nodes[N];
+        const double weights[3] = {-0.7745967, 0, 0.7745967};
+        const double nodes[3] = {0.5555556, 0.8888889, 0.5555556};
 
-        double integral = 0.0;
-
-        for (int i = 0; i < N; ++i) {
-            nodes[i] = cos(M_PI * (4.0 * i + 1.0) / (4.0 * N + 2.0));
-            weights[i] = M_PI / (N + 0.5) * (1.0 - nodes[i] * nodes[i]);
+        double ra = (B - A) / 2;
+        double su = (A + B) / 2;
+        double Q, S = 0.0;
+        for (int i = 0; i < 3; i++) {
+            Q = su + ra * weights[i];
+            S += nodes[i] * function(Q);
         }
-
-        double res = rectangleMethod();
-        double a = 0.5 * fabs(B - A);
-        double b = 0.5 * fabs(B + A);
-
-        for (int i = 0; i < N; ++i) {
-            double xi = a * nodes[i] + b;
-            integral += weights[i] * function(xi);
-        }
-        integral *= A;
-
-        return res;
+        return ra * S;
     }
 
 

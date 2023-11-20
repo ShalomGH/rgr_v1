@@ -278,8 +278,8 @@ private:
 protected:
     void fillMenuItems() override {
         menuItems.emplace_back("_____________________________________________");
-        menuItems.emplace_back("|    i   |  x[i]  |    F1[i]   |    F2[i]   |");
-        menuItems.emplace_back("|___________________________________________|");
+        menuItems.emplace_back("|   i    |  x[i]  |    F1[i]   |    F2[i]   |");
+        menuItems.emplace_back("|________|________|____________|____________|");
         for (int i = 0; i < N; i++) {
             if (i < 9)
                 menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
@@ -537,21 +537,20 @@ private:
         double a = A;
         double b = B;
         double x = 0;
-        while ((b - a) >  e) {
+        while ((b - a) > e) {
             x = (a + b) / 2;
             if (function(a) * function(b) > 0) return 404;
             if (function(x) * function(a) == 0) return x;
             if (function(x) * function(a) > 0) a = x;
             else b = x;
         }
-        return (a+b)/2;
+        return (a + b) / 2;
     }
 
     [[nodiscard]] double chordMethod(double a, double b) const {
-        while(fabs(function(b)) > e)
-        {
-            a = b - ((b - a) * function(b))/(function(b) - function(a));
-            b = a - ((a - b) * function(a))/(function(a) - function(b));
+        while (fabs(function(b)) > e) {
+            a = b - ((b - a) * function(b)) / (function(b) - function(a));
+            b = a - ((a - b) * function(a)) / (function(a) - function(b));
         }
         return b;
 

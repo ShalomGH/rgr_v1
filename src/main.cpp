@@ -685,7 +685,7 @@ private:
             for (int j = 35; j < 41; j++) {
                 canvas[i + yStart][j + xStart] = answers[k][j - 35];
             }
-            k += 1;
+            k++;
         }
     }
 };

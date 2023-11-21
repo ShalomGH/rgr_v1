@@ -9,18 +9,14 @@
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
 #define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
-
 #ifdef _WIN32
 
 #include <windows.h>
 
-
 #else
-
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <termios.h>
-
 int getch() {
     struct termios oldt{}, newt{};
     int ch;
@@ -32,11 +28,8 @@ int getch() {
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     return ch;
 }
-
 #endif
-
 using namespace std;
-
 
 static int SCREEN_HEIGHT;
 static int SCREEN_WIDTH;
@@ -182,7 +175,6 @@ protected:
     }
 
     virtual void fillMenuItems() {};
-
 private:
     virtual void calculateCords() {
         yStart = (SCREEN_HEIGHT - menuItems.size()) / 2;
@@ -211,7 +203,6 @@ private:
 
     size_t yPoint;
     size_t xPoint;
-
 public:
     Menu() {
         configureScreen();
@@ -263,9 +254,7 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 12;
-    const int A = 2;
-    const int B = 4;
+    const int N = 12, A = 2, B = 4;
 
     static double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
@@ -292,11 +281,14 @@ protected:
 
         for (int i = 0; i < N; i++) {
             menuItems.emplace_back("|        |        |            |           |");
-            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i], XF1F2[2][i]);
+            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i],
+                    XF1F2[2][i]);
 
-            menuItems[i+3][21] = (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA : ' ';
+            menuItems[i + 3][21] = (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA
+                                                                                                  : ' ';
             menuItems[i + 3][30] = Color::RESET;
-            menuItems[i+3][33] = (XF1F2[2][i] == maxF2) ? Color::GREEN : (XF1F2[2][i] == minF2) ? Color::MAGENTA : ' ';
+            menuItems[i + 3][33] = (XF1F2[2][i] == maxF2) ? Color::GREEN : (XF1F2[2][i] == minF2) ? Color::MAGENTA
+                                                                                                  : ' ';
             menuItems[i + 3][42] = Color::RESET;
         }
         menuItems.emplace_back("|__________________________________________|");
@@ -317,31 +309,26 @@ public:
 private:
     [[nodiscard]] vector<vector<double>> calculateArray() const {
         vector<vector<double>> XF1F2;
-
         XF1F2.resize(3);
         for (auto &i: XF1F2) i.resize(N);
-
         XF1F2[0][0] = double(A);
         for (int i = 0; i < N; i++) {
             if (i != 0) XF1F2[0][i] = XF1F2[0][i - 1] + dX;
             XF1F2[1][i] = F1(XF1F2[0][i]);
             XF1F2[2][i] = F2(XF1F2[0][i]);
         }
-
         return XF1F2;
     }
 
     [[nodiscard]] double findMax(vector<double> F) const {
         double max1 = F[0];
-        for (int i = 0; i < N; i++)
-            if (F[i] > max1)max1 = F[i];
+        for (int i = 0; i < N; i++) if (F[i] > max1)max1 = F[i];
         return max1;
     }
 
     [[nodiscard]] double findMin(vector<double> F) const {
         double min1 = F[0];
-        for (int i = 0; i < N; i++)
-            if (F[i] < min1)min1 = F[i];
+        for (int i = 0; i < N; i++) if (F[i] < min1)min1 = F[i];
         return min1;
     }
 };
@@ -460,8 +447,8 @@ private:
 
 class Equation : public Screen {
 private:
-    int A = -1;
-    int B = 4;
+    int A = -20;
+    int B = 10;
     const double e = 0.001;
 
     static double function(double x) {
@@ -478,7 +465,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "____________________________________________________",
-                "| Equation x^3 + 3x + 2 = 0 on the segment [  ,  ] |",
+                "| Equation x^3 + 3x + 2 = 0 on the segment[   ,   ]|",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
                 "| Bisection method:                                |",
@@ -487,7 +474,7 @@ protected:
                 "| Chords method:                                   |",
                 "----------------------------------------------------",
         };
-        sprintf(menuItems[1].data(), "| Equation x^3 + 3x + 2 = 0 on the segment [%2d,%2d] |", A, B);
+        sprintf(menuItems[1].data(), "| Equation x^3 + 3x + 2 = 0 on the segment[%3d,%3d]|", A, B);
         sprintf(menuItems[4].data(), "| Bisection method:                     %8f  |", bisectionMethod());
         sprintf(menuItems[7].data(), "| Chords method:                        %8f  |", chordsMethod());
     }
@@ -531,7 +518,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "---------------------------------------------",
-                "| cos(x) * pow(e, x) on the segment [  ,  ] |",
+                "| cos(x) * pow(e, x) on the segment[   ,   ]|",
                 "---------------------------------------------",
                 "---------------------------------------------",
                 "| Right Rectangle method:                   |",
@@ -551,13 +538,12 @@ protected:
                 "  e = " + to_string(e),
         };
 
-        sprintf(menuItems[1].data(),  "| cos(x) * pow(e, x) on the segment [%2d,%2d] |", A, B);
-        sprintf(menuItems[4].data(),  "| Right Rectangle method:        %8f |", rectangleMethod());
-        sprintf(menuItems[7].data(),  "| Trapeze method:                %8f |", trapezeMethod());
+        sprintf(menuItems[1].data(), "| cos(x) * pow(e, x) on the segment[%3d,%3d]|", A, B);
+        sprintf(menuItems[4].data(), "| Right Rectangle method:        %8f |", rectangleMethod());
+        sprintf(menuItems[7].data(), "| Trapeze method:                %8f |", trapezeMethod());
         sprintf(menuItems[10].data(), "| Gauss method:                  %8f |", gaussMethod());
         sprintf(menuItems[13].data(), "| Monte Carlo method:            %8f |", monteCarloMethod());
         sprintf(menuItems[16].data(), "| Middle Rectangle method:       %8f |", midRectangleMethod());
-
 
 
     }

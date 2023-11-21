@@ -284,42 +284,19 @@ protected:
         double minF1 = findMin(XF1F2[1]);
         double minF2 = findMin(XF1F2[2]);
 
-//        for (int i = 3; i < N + 3; i++) {
-//            int k = 0;
-//            for (int j = 0; j < 6; j++) {
-//                canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
-//
-//                canvas[i + yStart][21 + xStart] =
-//                        (XF1F2[1][i - 3] == maxF1) ? Color::GREEN : (XF1F2[1][i - 3] == minF1) ? Color::MAGENTA
-//                                                                                               : ' ';
-//
-//                canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
-//
-//                canvas[i + yStart][22 + 6 + xStart] = Color::RESET;
-//
-//                canvas[i + yStart][32 + xStart] =
-//                        (XF1F2[2][i - 3] == maxF2) ? Color::GREEN : (XF1F2[2][i - 3] == minF2) ? Color::MAGENTA
-//                                                                                               : ' ';
-//                canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
-//                canvas[i + yStart][33 + 6 + xStart] = Color::RESET;
-//                k++;
-//            }
-//        }
-
-
         menuItems = {
                 "____________________________________________",
                 "|   i    |   x[i]  |    F1[i]  |    F2[i]  |",
                 "|________|_________|___________|___________|",
         };
+
         for (int i = 0; i < N; i++) {
             menuItems.emplace_back("|        |        |            |           |");
             sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i], XF1F2[2][i]);
-            menuItems[i+3][21] =
-                    (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA : ' ';
+
+            menuItems[i+3][21] = (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA : ' ';
             menuItems[i + 3][30] = Color::RESET;
-            menuItems[i+3][33] =
-                    (XF1F2[2][i] == maxF2) ? Color::GREEN : (XF1F2[2][i] == minF2) ? Color::MAGENTA : ' ';
+            menuItems[i+3][33] = (XF1F2[2][i] == maxF2) ? Color::GREEN : (XF1F2[2][i] == minF2) ? Color::MAGENTA : ' ';
             menuItems[i + 3][42] = Color::RESET;
         }
         menuItems.emplace_back("|__________________________________________|");
@@ -454,12 +431,8 @@ private:
     }
 
     void drawCoordinates() {
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            canvas[SCREEN_HEIGHT / 2][x] = '-';
-        }
-        for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-            canvas[y][SCREEN_WIDTH / 2] = '|';
-        }
+        for (int x = 0; x < SCREEN_WIDTH; ++x) canvas[SCREEN_HEIGHT / 2][x] = '-';
+        for (int y = 0; y < SCREEN_HEIGHT; ++y) canvas[y][SCREEN_WIDTH / 2] = '|';
         canvas[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = '+';
     }
 
@@ -498,7 +471,6 @@ private:
 public:
     Equation() {
         configureScreen();
-        drawAnswers();
     }
 
 
@@ -515,26 +487,15 @@ protected:
                 "| Chords method:                                   |",
                 "----------------------------------------------------",
         };
-    }
-
-public:
-    void render() override {
-        switch (Buttons::getKeyCode()) {
-            case (Buttons::Keys::ESC):
-                screenId = ScreenIds::MENU;
-                break;
-//            case (Buttons::Keys::ENTER):
-//                screenId = ScreenIds::MENU;
-//                break;
-        }
+        sprintf(menuItems[1].data(), "| Equation x^3 + 3x + 2 = 0 on the segment [%2d,%2d] |", A, B);
+        sprintf(menuItems[4].data(), "| Bisection method:                     %8f  |", bisectionMethod());
+        sprintf(menuItems[7].data(), "| Chords method:                        %8f  |", chordsMethod());
     }
 
 private:
 
     [[nodiscard]] double bisectionMethod() const {
-        double a = A;
-        double b = B;
-        double x = 0;
+        double a = A, b = B, x = 0;
         while ((b - a) > e) {
             x = (a + b) / 2;
             if (function(a) * function(b) > 0) return 404;
@@ -545,36 +506,13 @@ private:
         return (a + b) / 2;
     }
 
-    [[nodiscard]] double chordMethod(double a, double b) const {
+    [[nodiscard]] double chordsMethod() const {
+        double a = A, b = B;
         while (fabs(function(b)) > e) {
             a = b - ((b - a) * function(b)) / (function(b) - function(a));
             b = a - ((a - b) * function(a)) / (function(a) - function(b));
         }
         return b;
-
-    }
-
-    void drawMenuItems() override {
-        if (A < 0) menuItems[1][menuItems[1].size() - 8] = '-';
-        if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = abs(A) / 10 + '0';
-        menuItems[1][menuItems[1].size() - 7] = abs(A) % 10 + '0';
-        if (B < 0) menuItems[1][menuItems[1].size() - 5] = '-';
-        if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = abs(B) / 10 + '0';
-        menuItems[1][menuItems[1].size() - 4] = abs(B) % 10 + '0';
-        Screen::drawMenuItems();
-    }
-
-    void drawAnswers() {
-        string answers[2];
-        answers[0] = to_string(bisectionMethod());
-        answers[1] = to_string(chordMethod(1.0, 4.0));
-        int k = 0;
-        for (int i = 4; i < menuItems.size(); i += 3) {
-            for (int j = 35; j < 41; j++) {
-                canvas[i + yStart][j + xStart] = answers[k][j - 35];
-            }
-            k += 1;
-        }
     }
 };
 
@@ -592,7 +530,7 @@ private:
 protected:
     void fillMenuItems() override {
         menuItems = {
-                "--------------------------------------------",
+                "---------------------------------------------",
                 "| cos(x) * pow(e, x) on the segment [  ,  ] |",
                 "---------------------------------------------",
                 "---------------------------------------------",
@@ -610,8 +548,18 @@ protected:
                 "---------------------------------------------",
                 "| Middle Rectangle method:                  |",
                 "---------------------------------------------",
+                "  e = " + to_string(e),
         };
-        menuItems.push_back("  e = " + to_string(e));
+
+        sprintf(menuItems[1].data(),  "| cos(x) * pow(e, x) on the segment [%2d,%2d] |", A, B);
+        sprintf(menuItems[4].data(),  "| Right Rectangle method:        %8f |", rectangleMethod());
+        sprintf(menuItems[7].data(),  "| Trapeze method:                %8f |", trapezeMethod());
+        sprintf(menuItems[10].data(), "| Gauss method:                  %8f |", gaussMethod());
+        sprintf(menuItems[13].data(), "| Monte Carlo method:            %8f |", monteCarloMethod());
+        sprintf(menuItems[16].data(), "| Middle Rectangle method:       %8f |", midRectangleMethod());
+
+
+
     }
 
     const double H = fabs(B - A) / N;
@@ -619,7 +567,6 @@ protected:
 public:
     Integrals() {
         configureScreen();
-        drawAnswers();
     }
 
 private:
@@ -631,16 +578,14 @@ private:
 
     [[nodiscard]] double rectangleMethod() const {
         double s = 0;
-        for (float x = float(B); x > A; x -= e) s += function(x) * e;
+        for (double x = B; x > A; x -= e) s += function(x) * e;
         return s;
     }
 
     [[nodiscard]] double gaussMethod() const {
         const double weights[3] = {-0.7745967, 0, 0.7745967};
         const double nodes[3] = {0.5555556, 0.8888889, 0.5555556};
-
-        double ra = (B - A) / 2;
-        double su = (A + B) / 2;
+        double ra = (B - A) / 2.0, su = (A + B) / 2.0;
         double Q, S = 0.0;
         for (int i = 0; i < 3; i++) {
             Q = su + ra * weights[i];
@@ -661,47 +606,27 @@ private:
     }
 
     [[nodiscard]] double midRectangleMethod() const {
-        double h = fabs(B - A) / N;
-        double sum = 0.0;
-        for (int i = 0; i < N; i++) {
-            sum += function(A + (i + 0.5) * h);
-        }
+        double h = fabs(B - A) / N, sum = 0.0;
+        for (int i = 0; i < N; i++) sum += function(A + (i + 0.5) * h);
         return h * sum;
     }
-
-    void drawMenuItems() override {
-        if (A / 10 != 0) menuItems[1][menuItems[1].size() - 8] = A / 10 + '0';
-        menuItems[1][menuItems[1].size() - 7] = A % 10 + '0';
-        if (B / 10 != 0) menuItems[1][menuItems[1].size() - 5] = B / 10 + '0';
-        menuItems[1][menuItems[1].size() - 4] = B % 10 + '0';
-
-        Screen::drawMenuItems();
-    }
-
-
-    void drawAnswers() {
-        string answers[5];
-        answers[0] = to_string(rectangleMethod());
-        answers[1] = to_string(trapezeMethod());
-        answers[2] = to_string(gaussMethod());
-        answers[3] = to_string(monteCarloMethod());
-        answers[4] = to_string(midRectangleMethod());
-        int k = 0;
-        for (int i = 4; i < menuItems.size(); i += 3) {
-            for (int j = 35; j < 41; j++) {
-                canvas[i + yStart][j + xStart] = answers[k][j - 35];
-            }
-            k++;
-        }
-    }
 };
-
 
 static auto previousAnimationTime = std::chrono::system_clock::now();
 
 class Animation : public Screen {
 
 private:
+    void fillMenuItems() override {
+        menuItems = {
+                " _________________________    ",
+                "|   |     |     |    | |  \\  ",
+                "|___|_____|_____|____|_|___\\ ",
+                "|                    | |    \\",
+                "`--(o)(o)--------------(o)--' ",
+        };
+    }
+
     const int delay = 10;
     const vector<vector<char>> voidCanvas = generateCanvas();
 
@@ -713,8 +638,7 @@ public:
 
     void render() override {
         auto now = std::chrono::system_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() -
-            delay > 0) {
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() - delay > 0) {
             canvas = voidCanvas;
             moveDrawing();
             update();
@@ -729,36 +653,20 @@ private:
         else xStart = 0 - menuItems[0].size();
         drawMenuItems();
     }
-
-    void fillMenuItems() override {
-        menuItems = {
-                " _________________________    ",
-                "|   |     |     |    | |  \\  ",
-                "|___|_____|_____|____|_|___\\ ",
-                "|                    | |    \\",
-                "`--(o)(o)--------------(o)--' ",
-        };
-    }
 };
 
 class Author : public Screen {
 protected:
     void fillMenuItems() override {
         menuItems = {
-                R"(/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \    )",
-                "RGR for programming                                       ",
+                R"(;/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \    %)",
+                "?RGR for programming                                       ",
                 " University: OmSTU                                         ",
                 " Faculty: FiTIKS                                           ",
                 " Group: PI-232                                             ",
-                " pistrunov pistrun pistrunovich                            ",
-                R"(\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    )",
+                " pistrunov pistrun pistrunovich                           %",
+                R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    %)",
         };
-
-
-        menuItems[0].insert(0, 1, Color::GREEN);
-        menuItems[1].insert(0, 1, Color::MAGENTA);
-        menuItems[menuItems.size() - 1].insert(0, 1, Color::GREEN);
-        menuItems[menuItems.size() - 1].insert(menuItems[0].size() - 2, menuItems[0].size() - 1, Color::RESET);
     }
 
 public:

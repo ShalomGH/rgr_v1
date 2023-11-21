@@ -277,17 +277,50 @@ private:
 
 protected:
     void fillMenuItems() override {
-        menuItems.emplace_back("_____________________________________________");
-        menuItems.emplace_back("|   i    |  x[i]  |    F1[i]   |    F2[i]   |");
-        menuItems.emplace_back("|________|________|____________|____________|");
-        for (int i = 0; i < N; i++) {
-            if (i < 9)
-                menuItems.emplace_back("|   " + to_string(i + 1) + "    |        |            |            |");
-            else menuItems.emplace_back("|   " + to_string(i + 1) + "   |        |            |            |");
-        }
-        menuItems.emplace_back("|___________________________________________|");
+        vector<vector<double>> XF1F2 = calculateArray();
 
-        Screen::fillMenuItems();
+        double maxF1 = findMax(XF1F2[1]);
+        double maxF2 = findMax(XF1F2[2]);
+        double minF1 = findMin(XF1F2[1]);
+        double minF2 = findMin(XF1F2[2]);
+
+//        for (int i = 3; i < N + 3; i++) {
+//            int k = 0;
+//            for (int j = 0; j < 6; j++) {
+//                canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
+//
+//                canvas[i + yStart][21 + xStart] =
+//                        (XF1F2[1][i - 3] == maxF1) ? Color::GREEN : (XF1F2[1][i - 3] == minF1) ? Color::MAGENTA
+//                                                                                               : ' ';
+//
+//                canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
+//
+//                canvas[i + yStart][22 + 6 + xStart] = Color::RESET;
+//
+//                canvas[i + yStart][32 + xStart] =
+//                        (XF1F2[2][i - 3] == maxF2) ? Color::GREEN : (XF1F2[2][i - 3] == minF2) ? Color::MAGENTA
+//                                                                                               : ' ';
+//                canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
+//                canvas[i + yStart][33 + 6 + xStart] = Color::RESET;
+//                k++;
+//            }
+//        }
+
+
+        menuItems = {
+                "____________________________________________",
+                "|   i    |   x[i]  |    F1[i]  |    F2[i]  |",
+                "|________|_________|___________|___________|",
+        };
+        for (int i = 0; i < N; i++) {
+            menuItems.emplace_back("|        |        |            |           |");
+            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i], XF1F2[2][i]);
+        }
+        menuItems.emplace_back("|__________________________________________|");
+        menuItems.emplace_back("Max F1: " + to_string(maxF1));
+        menuItems.emplace_back("Max F2: " + to_string(maxF2));
+        menuItems.emplace_back("Min F1: " + to_string(minF1));
+        menuItems.emplace_back("Min F2: " + to_string(minF2));
     }
 
 private:
@@ -296,7 +329,6 @@ private:
 public:
     Table() {
         configureScreen();
-        drawAnswers();
     }
 
 private:
@@ -314,46 +346,6 @@ private:
         }
 
         return XF1F2;
-    }
-
-    void drawAnswers() {
-        vector<vector<double>> XF1F2 = calculateArray();
-
-        double maxF1 = findMax(XF1F2[1]);
-        double maxF2 = findMax(XF1F2[2]);
-        double minF1 = findMin(XF1F2[1]);
-        double minF2 = findMin(XF1F2[2]);
-
-        for (int i = 3; i < N + 3; i++) {
-            int k = 0;
-            for (int j = 0; j < 6; j++) {
-                canvas[i + yStart][11 + j + xStart] = to_string(XF1F2[0][i - 3])[k];
-                canvas[i + yStart][21 + xStart] =
-                        (XF1F2[1][i - 3] == maxF1) ? Color::GREEN : (XF1F2[1][i - 3] == minF1) ? Color::MAGENTA
-                                                                                               : ' ';
-                canvas[i + yStart][22 + j + xStart] = to_string(XF1F2[1][i - 3])[k];
-                canvas[i + yStart][22 + 6 + xStart] = Color::RESET;
-                canvas[i + yStart][32 + xStart] =
-                        (XF1F2[2][i - 3] == maxF2) ? Color::GREEN : (XF1F2[2][i - 3] == minF2) ? Color::MAGENTA
-                                                                                               : ' ';
-                canvas[i + yStart][33 + j + xStart] = to_string(XF1F2[2][i - 3])[k];
-                canvas[i + yStart][33 + 6 + xStart] = Color::RESET;
-                k++;
-            }
-        }
-
-        const string maxF1Str = "Max F1: " + to_string(maxF1);
-        const string maxF2Str = "Max F2: " + to_string(maxF2);
-        const string minF1Str = "Min F1: " + to_string(minF1);
-        const string minF2Str = "Min F2: " + to_string(minF2);
-
-        canvas[yStart + 3 + N + 2 + 0][xStart - 1] = Color::GREEN;
-        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 0][xStart + j] = maxF1Str[j];
-        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 1][xStart + j] = maxF2Str[j];
-        canvas[yStart + 3 + N + 2 + 2][xStart - 1] = Color::MAGENTA;
-        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 2][xStart + j] = minF1Str[j];
-        for (int j = 0; j < 15; j++) canvas[yStart + 3 + N + 2 + 3][xStart + j] = minF2Str[j];
-        canvas[yStart + 3 + N + 2 + 4][xStart - 1] = Color::RESET;
     }
 
     [[nodiscard]] double findMax(vector<double> F) const {

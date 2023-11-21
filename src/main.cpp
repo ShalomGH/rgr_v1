@@ -315,12 +315,18 @@ protected:
         for (int i = 0; i < N; i++) {
             menuItems.emplace_back("|        |        |            |           |");
             sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i], XF1F2[2][i]);
+            menuItems[i+3][21] =
+                    (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA : ' ';
+            menuItems[i + 3][30] = Color::RESET;
+            menuItems[i+3][33] =
+                    (XF1F2[2][i] == maxF2) ? Color::GREEN : (XF1F2[2][i] == minF2) ? Color::MAGENTA : ' ';
+            menuItems[i + 3][42] = Color::RESET;
         }
         menuItems.emplace_back("|__________________________________________|");
-        menuItems.emplace_back("Max F1: " + to_string(maxF1));
-        menuItems.emplace_back("Max F2: " + to_string(maxF2));
-        menuItems.emplace_back("Min F1: " + to_string(minF1));
-        menuItems.emplace_back("Min F2: " + to_string(minF2));
+        menuItems.emplace_back(";Max F1: " + to_string(maxF1));
+        menuItems.emplace_back(" Max F2: " + to_string(maxF2) + "%");
+        menuItems.emplace_back("?Min F1: " + to_string(minF1));
+        menuItems.emplace_back(" Min F2: " + to_string(minF2) + "%");
     }
 
 private:

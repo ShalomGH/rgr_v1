@@ -135,12 +135,21 @@ public:
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
                 if (canvas[i][j]) {
-                    if (canvas[i][j] == Color::GREEN) cout << GREEN_CODE << " ";
-                    else if (canvas[i][j] == Color::MAGENTA) cout << MAGENTA_CODE << " ";
-                    else if (canvas[i][j] == Color::RESET) cout << RESET_CODE << " ";
-                    else cout << canvas[i][j];
-                } else
-                    cout << " ";
+                    switch (canvas[i][j]) {
+                        case Color::GREEN:
+                            cout << GREEN_CODE << " ";
+                            break;
+                        case Color::MAGENTA:
+                            cout << MAGENTA_CODE << " ";
+                            break;
+                        case Color::RESET:
+                            cout << RESET_CODE << " ";
+                            break;
+                        default:
+                            cout << canvas[i][j];
+                            break;
+                    }
+                } else cout << " ";
             cout << endl;
         }
     }
@@ -447,8 +456,7 @@ private:
 
 class Equation : public Screen {
 private:
-    int A = -20;
-    int B = 10;
+    int A = -20, B = 10;
     const double e = 0.001;
 
     static double function(double x) {
@@ -612,8 +620,9 @@ private:
                 "`--(o)(o)--------------(o)--' ",
         };
     }
-
     const int delay = 10;
+
+
     const vector<vector<char>> voidCanvas = generateCanvas();
 
 public:

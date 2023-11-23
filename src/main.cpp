@@ -7,7 +7,6 @@
 #define RESET_CODE   "\033[0m"
 #define GREEN_CODE   "\033[32m"      /* Green */
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
-#define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 #ifdef _WIN32
 
@@ -130,7 +129,7 @@ public:
 
     virtual void update() {
 #ifdef _WIN32
-        cout << CLEAR_CODE;
+        system("cls");
 #endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -481,8 +480,8 @@ public:
         switch (Buttons::getKeyCode()) {
             case (Buttons::Keys::ESC):
                 opened = true;
-                A=0;
-                B=0;
+                A = 0;
+                B = 0;
                 screenId = ScreenIds::MENU;
                 break;
         }
@@ -492,18 +491,15 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "____________________________________________________",
-                "| Equation x^3 + 3x + 2 = 0 on the segment[   ,   ]|",
+                format("| Equation x^3 + 3x + 2 = 0 on the segment[{:3},{:3}]|", A, B),
                 "----------------------------------------------------",
                 "----------------------------------------------------",
-                "| Bisection method:                                |",
+                format("| Bisection method:                 {:14f} |", bisectionMethod()),
                 "----------------------------------------------------",
                 "----------------------------------------------------",
-                "| Chords method:                                   |",
+                format("| Chords method:                    {:14f} |", chordsMethod()),
                 "----------------------------------------------------",
         };
-        sprintf(menuItems[1].data(), "| Equation x^3 + 3x + 2 = 0 on the segment[%3d,%3d]|", A, B);
-        sprintf(menuItems[4].data(), "| Bisection method:                     %8f  |", bisectionMethod());
-        sprintf(menuItems[7].data(), "| Chords method:                        %8f  |", chordsMethod());
     }
 
 private:
@@ -517,7 +513,9 @@ private:
             if (function(x) * function(a) > 0) a = x;
             else b = x;
         }
-        return (a + b) / 2;
+        const double answer = (a + b) / 2;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 
     [[nodiscard]] double chordsMethod() const {
@@ -526,13 +524,16 @@ private:
             a = b - ((b - a) * function(b)) / (function(b) - function(a));
             b = a - ((a - b) * function(a)) / (function(a) - function(b));
         }
-        return b;
+        const double answer = b;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 };
 
 class Integrals : public Screen {
 private:
-    int A = 0; int B = 0;
+    int A = 0;
+    int B = 0;
     const int N = 10000;
     const double e = 0.001;
 
@@ -540,40 +541,31 @@ private:
         return cos(x) * pow(M_E, x);
     }
 
-    bool opened = true;
+    bool opened1 = true;
 
 protected:
     void fillMenuItems() override {
         menuItems = {
                 "---------------------------------------------",
-                "| cos(x) * pow(e, x) on the segment[   ,   ]|",
+                format("| cos(x) * pow(e, x) on the segment[{:3},{:3}]|",A,B),
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Right Rectangle method:                   |",
+                format("| Right Rectangle method:  {:16f} |", rectangleMethod()),
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Trapeze method:                           |",
+                format("| Trapeze method:          {:16f} |", trapezeMethod()),
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Gauss method:                             |",
+                format("| Gauss method:            {:16f} |", gaussMethod()),
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Monte Carlo method:                       |",
+                format("| Monte Carlo method:      {:16f}  |", monteCarloMethod()),
                 "---------------------------------------------",
                 "---------------------------------------------",
-                "| Middle Rectangle method:                  |",
+                format("| Middle Rectangle method: {:16f} |", midRectangleMethod()),
                 "---------------------------------------------",
                 "  e = " + to_string(e),
         };
-
-        sprintf(menuItems[1].data(), "| cos(x) * pow(e, x) on the segment[%3d,%3d]|", A, B);
-        sprintf(menuItems[4].data(), "| Right Rectangle method:        %8f |", rectangleMethod());
-        sprintf(menuItems[7].data(), "| Trapeze method:                %8f |", trapezeMethod());
-        sprintf(menuItems[10].data(), "| Gauss method:                  %8f |", gaussMethod());
-        sprintf(menuItems[13].data(), "| Monte Carlo method:            %8f |", monteCarloMethod());
-        sprintf(menuItems[16].data(), "| Middle Rectangle method:       %8f |", midRectangleMethod());
-
-
     }
 
     const double H = fabs(B - A) / N;
@@ -584,8 +576,8 @@ public:
     }
 
     void render() override {
-        if (opened) {
-            opened = false;
+        if (opened1) {
+            opened1 = false;
             configureScreen();
             update();
             cin >> A;
@@ -597,9 +589,9 @@ public:
         }
         switch (Buttons::getKeyCode()) {
             case (Buttons::Keys::ESC):
-                opened = true;
-                A=0;
-                B=0;
+                opened1 = true;
+                A = 0;
+                B = 0;
                 screenId = ScreenIds::MENU;
                 break;
         }
@@ -609,13 +601,17 @@ private:
     [[nodiscard]] double trapezeMethod() const {
         double s = function(A) + function(B);
         for (int i = 1; i < N; i++) s += 2.0 * function(A + i * H);
-        return (H / 2.0) * s;
+        const double answer = (H / 2.0) * s;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 
     [[nodiscard]] double rectangleMethod() const {
         double s = 0;
         for (double x = B; x > A; x -= e) s += function(x) * e;
-        return s;
+        const double answer = s;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 
     [[nodiscard]] double gaussMethod() const {
@@ -627,7 +623,9 @@ private:
             Q = su + ra * weights[i];
             S += nodes[i] * function(Q);
         }
-        return ra * S;
+        const double answer = ra * S;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 
 
@@ -638,13 +636,17 @@ private:
             double x = A + static_cast<double>(rand()) / RAND_MAX * (B - A);
             sum += function(x);
         }
-        return (B - A) * sum / n;
+        const double answer = (B - A) * sum / n;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 
     [[nodiscard]] double midRectangleMethod() const {
         double h = fabs(B - A) / N, sum = 0.0;
         for (int i = 0; i < N; i++) sum += function(A + (i + 0.5) * h);
-        return h * sum;
+        const double answer = h * sum;
+        if (answer < A || answer > B) return NAN;
+        return answer;
     }
 };
 
@@ -662,6 +664,7 @@ private:
                 "`--(o)(o)--------------(o)--' ",
         };
     }
+
     const int delay = 10;
 
 
@@ -754,6 +757,5 @@ int main() {
     }
 
     for (auto &screen: screens) delete screen;
-    cout << CLEAR_CODE;
     exit(1);
 }

@@ -345,8 +345,8 @@ private:
 class Graphic : public Screen {
 private:
     vector<string> functionsNames{
-            "* - E^(2 * x) * x^(1 / 3) - sin(x)  ",
-            "# - 10 / (2 + x^2)                  ",
+            ";* - E^(2 * x) * x^(1 / 3) - sin(x) % ",
+            "?# - 10 / (2 + x^2)                 % ",
     };
 
     static double F1(double x) {
@@ -420,10 +420,6 @@ private:
             canvas[0][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[0][x];
             canvas[1][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[1][x];
         }
-        canvas[0][SCREEN_WIDTH - functionsNames[0].size() - 2] = Color::GREEN;
-        canvas[1][SCREEN_WIDTH - functionsNames[0].size() - 2] = Color::MAGENTA;
-        canvas[0][SCREEN_WIDTH - 2] = Color::RESET;
-        canvas[1][SCREEN_WIDTH - 2] = Color::RESET;
     }
 
     void drawCoordinates() {

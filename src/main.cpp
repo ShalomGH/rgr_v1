@@ -452,18 +452,41 @@ private:
 
 class Equation : public Screen {
 private:
-    int A = -20, B = 10;
+    int A = 0, B = 0;
     const double e = 0.001;
 
     static double function(double x) {
         return pow(x, 3) + 3 * x + 2;
     }
 
+    bool opened = true;
+
 public:
     Equation() {
         configureScreen();
     }
 
+    void render() override {
+        if (opened) {
+            opened = false;
+            configureScreen();
+            update();
+            cin >> A;
+            configureScreen();
+            update();
+            cin >> B;
+            configureScreen();
+            update();
+        }
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ESC):
+                opened = true;
+                A=0;
+                B=0;
+                screenId = ScreenIds::MENU;
+                break;
+        }
+    }
 
 protected:
     void fillMenuItems() override {
@@ -509,14 +532,15 @@ private:
 
 class Integrals : public Screen {
 private:
-    const int A = 1;
-    const int B = 5;
+    int A = 0; int B = 0;
     const int N = 10000;
     const double e = 0.001;
 
     static double function(double x) {
         return cos(x) * pow(M_E, x);
     }
+
+    bool opened = true;
 
 protected:
     void fillMenuItems() override {
@@ -559,11 +583,33 @@ public:
         configureScreen();
     }
 
+    void render() override {
+        if (opened) {
+            opened = false;
+            configureScreen();
+            update();
+            cin >> A;
+            configureScreen();
+            update();
+            cin >> B;
+            configureScreen();
+            update();
+        }
+        switch (Buttons::getKeyCode()) {
+            case (Buttons::Keys::ESC):
+                opened = true;
+                A=0;
+                B=0;
+                screenId = ScreenIds::MENU;
+                break;
+        }
+    }
+
 private:
     [[nodiscard]] double trapezeMethod() const {
         double s = function(A) + function(B);
-        for (int i = 1; i < N; i++) s += 2 * function(A + i * H);
-        return (H / 2) * s;
+        for (int i = 1; i < N; i++) s += 2.0 * function(A + i * H);
+        return (H / 2.0) * s;
     }
 
     [[nodiscard]] double rectangleMethod() const {

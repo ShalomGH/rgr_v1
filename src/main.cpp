@@ -508,7 +508,7 @@ private:
         double a = A, b = B, x = 0;
         while ((b - a) > e) {
             x = (a + b) / 2;
-            if (function(a) * function(b) > 0) return 404;
+            if (function(a) * function(b) > 0) return NAN;
             if (function(x) * function(a) == 0) return x;
             if (function(x) * function(a) > 0) a = x;
             else b = x;

@@ -559,7 +559,7 @@ protected:
                 format("| Gauss method:            {:16f} |", gaussMethod()),
                 "---------------------------------------------",
                 "---------------------------------------------",
-                format("| Monte Carlo method:      {:16f}  |", monteCarloMethod()),
+                format("| Monte Carlo method:      {:16f} |", monteCarloMethod()),
                 "---------------------------------------------",
                 "---------------------------------------------",
                 format("| Middle Rectangle method: {:16f} |", midRectangleMethod()),

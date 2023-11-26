@@ -292,7 +292,7 @@ protected:
 
         for (int i = 0; i < N; i++) {
             menuItems.emplace_back("|        |        |            |           |");
-            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i],
+            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#7.5f | %#9g | %#9g |", i+1, XF1F2[0][i], XF1F2[1][i],
                     XF1F2[2][i]);
 
             menuItems[i + 3][21] = (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA

@@ -14,6 +14,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#include <conio.h>
 
 #else
 #include <sys/ioctl.h>
@@ -471,6 +472,7 @@ public:
     void render() override {
         if (opened) {
             opened = false;
+            A=0; B=0;
             configureScreen();
             update();
             cin >> A;
@@ -593,6 +595,8 @@ public:
     void render() override {
         if (opened) {
             opened = false;
+            A=0; B=0;
+            getch();
             configureScreen();
             update();
             cin >> A;

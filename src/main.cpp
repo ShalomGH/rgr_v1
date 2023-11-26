@@ -132,8 +132,7 @@ public:
 
     virtual void update() {
 #ifdef _WIN32
-        system("cls");
-//        cout << CLEAR_CODE;
+       cout << CLEAR_CODE;
 #endif
         for (int i = 0; i < SCREEN_HEIGHT; ++i) {
             for (int j = 0; j < SCREEN_WIDTH; ++j)
@@ -515,7 +514,7 @@ private:
         double a = A, b = B, x = 0;
         while ((b - a) > e) {
             x = (a + b) / 2;
-            if (function(a) * function(b) > 0) return 404;
+            if (function(a) * function(b) > 0) return NAN;
             if (function(x) * function(a) == 0) return x;
             if (function(x) * function(a) > 0) a = x;
             else b = x;
@@ -574,11 +573,11 @@ protected:
         };
 
         sprintf(menuItems[1].data(), "| cos(x) * pow(e, x) on the segment[%3d,%3d]|", A, B);
-        sprintf(menuItems[4].data(),  "| Right Rectangle method:  %8f |", rectangleMethod());
-        sprintf(menuItems[7].data(), "| Trapeze method:           %8f |", trapezeMethod());
-        sprintf(menuItems[10].data(), "| Gauss method:            %8f |", gaussMethod());
-        sprintf(menuItems[13].data(), "| Monte Carlo method:      %8f |", monteCarloMethod());
-        sprintf(menuItems[16].data(), "| Middle Rectangle method: %8f |", midRectangleMethod());
+        sprintf(menuItems[4].data(),  "| Right Rectangle method:  %8f", rectangleMethod());
+        sprintf(menuItems[7].data(), "| Trapeze method:           %8f", trapezeMethod());
+        sprintf(menuItems[10].data(), "| Gauss method:            %8f", gaussMethod());
+        sprintf(menuItems[13].data(), "| Monte Carlo method:      %8f", monteCarloMethod());
+        sprintf(menuItems[16].data(), "| Middle Rectangle method: %8f", midRectangleMethod());
 
 
 

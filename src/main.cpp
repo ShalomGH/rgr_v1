@@ -266,7 +266,7 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 20, A = 0, B = Pi;
+    const int N = 20, A = 0, B = M_PI;
 
     static double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
@@ -618,7 +618,6 @@ private:
         double s = function(A) + function(B);
         for (int i = 1; i < N; i++) s += 2.0 * function(A + i * H);
         const double answer = (H / 2.0) * s;
-        if (answer<A || answer>B) return NAN;
         return answer;
     }
 
@@ -626,7 +625,6 @@ private:
         double s = 0;
         for (double x = B; x > A; x -= e) s += function(x) * e;
         const double answer = s;
-        if (answer<A || answer>B) return NAN;
         return answer;
     }
 
@@ -640,7 +638,6 @@ private:
             S += nodes[i] * function(Q);
         }
         const double answer = ra*S;
-        if (answer<A || answer>B) return NAN;
         return answer;
     }
 
@@ -653,7 +650,6 @@ private:
             sum += function(x);
         }
         const double answer = (B - A) * sum / n;
-        if (answer<A || answer>B) return NAN;
         return answer;
     }
 
@@ -661,7 +657,6 @@ private:
         double h = fabs(B - A) / N, sum = 0.0;
         for (int i = 0; i < N; i++) sum += function(A + (i + 0.5) * h);
         const double answer = h*sum;
-        if (answer<A || answer>B) return NAN;
         return answer;
     }
 };

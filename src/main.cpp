@@ -267,11 +267,11 @@ private:
     const int N = 20, A = 0, B = Pi;
 
     static double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+        return pow(M_E, 0-x) + cos(2 * x);
     }
 
     static double F2(double x) {
-        return 10 / (2 + x * x);
+        return pow(M_E, -2 * x);
     }
 
 protected:
@@ -346,16 +346,16 @@ private:
 class Graphic : public Screen {
 private:
     vector<string> functionsNames{
-            ";* - E^(2 * x) * x^(1 / 3) - sin(x) % ",
-            "?# - 10 / (2 + x^2)                 % ",
+            ";* - E^-x + cos2x % ",
+            "?# - E^-2x % ",
     };
 
     static double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+        return pow(M_E, 0-x) + cos(2 * x);
     }
 
     static double F2(double x) {
-        return 10 / (2 + x * x);
+        return pow(M_E, -2 * x);
     }
 
 
@@ -659,15 +659,36 @@ class Animation : public Screen {
 private:
     void fillMenuItems() override {
         menuItems = {
-                " _________________________    ",
-                "|   |     |     |    | |  \\  ",
-                "|___|_____|_____|____|_|___\\ ",
-                "|                    | |    \\",
-                "`--(o)(o)--------------(o)--' ",
+                "       $$$$$$$$$",
+                "     $$$  $$$$$$",
+                "   $$    $$              $$$$$$",
+                "   $   $             $$$$ $$$$$$$$$$",
+                "  $$   $$$$$$$$      $$   $$       $$$$$$",
+                "  $$ $$$$     $$$$$$$      $        $$ $$",
+                "   $$$            $$       $$         $ $",
+                "  $$             $$         $         $$ $$",
+                " $$              $$         $           $ $$",
+                " $                 $$$$    $$ $$    $$$$  $",
+                " $                 $$$$$$$$$  $0$  $0$ $ $$",
+                " $                $$$$   $$         $$  $$",
+                " $$                $ $$            $ $$",
+                " $                 $$_$$$$$$ $     $$$$",
+                "$        $          $$$$$ $$$$     $$$",
+                "$      $$$$$           $$$$$$$$$$$$$$",
+                "$     $$ $ $$$            $  $$$     ",
+                "$     $  $$  $$$      $$$ $   $$$$     ",
+                "$      $  $$   $      $ $$$      $ $    ",
+                "$$  $$$$   $$$$$$     $$ $ $      $$$$   ",
+                " $$$$$$$      $$$      $$$  $       $$$   ",
+                "                 $     $$  $$$       $  $$",
+                "                 $$     $$$ $$$         $$",
+                "                  $$      $$ $$$$$     $$",
+                "                   $$$$ $$$     $$$$$$$",
+                "                     $$$$$",
         };
     }
 
-    const int delay = 10;
+    const int delay = 50;
 
 
     const vector<vector<char>> voidCanvas = generateCanvas();
@@ -701,13 +722,13 @@ class Author : public Screen {
 protected:
     void fillMenuItems() override {
         menuItems = {
-                R"(;/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \    %)",
-                "?RGR for programming                                       ",
-                " University: OmSTU                                         ",
-                " Faculty: FiTIKS                                           ",
-                " Group: PI-232                                             ",
-                " pistrunov pistrun pistrunovich                           %",
-                R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    %)",
+                R"(?-------======={ X }=======-------                     %)",
+                ";       RGR for programming                                ",
+                "         University: OmSTU                                 ",
+                "         Faculty: FoITaCS                                  ",
+                "          Group: IST-231                                   ",
+                "     Ilichev Andrey Sergeevich                            %",
+                R"(?-------======={ X }=======-------                     %)",
         };
     }
 

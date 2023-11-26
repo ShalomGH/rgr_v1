@@ -5,8 +5,8 @@
 #include <chrono>
 
 #define RESET_CODE   "\033[0m"
-#define GREEN_CODE   "\033[32m"      /* Green */
-#define MAGENTA_CODE "\033[35m"      /* Magenta */
+#define GREEN_CODE   "\u001b[34;1m"      /* Green */
+#define MAGENTA_CODE "\u001b[33m"      /* Magenta */
 #define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
 #define Pi 3.14
@@ -266,14 +266,14 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 20, A = 0, B = M_PI;
+    const int N = 20, A = 0, B = 2* M_PI;
 
-    static double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+    static float F1(float x) {
+        return 5 - 3 * cos(x);
     }
 
-    static double F2(double x) {
-        return 10 / (2 + x * x);
+    static float F2(float x) {
+        return pow(1 + pow(sin(x) , 2) ,1/2);
     }
 
 protected:
@@ -353,11 +353,11 @@ private:
     };
 
     static double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
+        return 5 - 3 * cos(x);
     }
 
     static double F2(double x) {
-        return 10 / (2 + x * x);
+        return pow(1 + pow(sin(x) , 2) ,1/2);
     }
 
 
@@ -712,13 +712,17 @@ class Author : public Screen {
 protected:
     void fillMenuItems() override {
         menuItems = {
-                R"(;/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \    %)",
-                "?RGR for programming                                       ",
-                " University: OmSTU                                         ",
-                " Faculty: FiTIKS                                           ",
-                " Group: PI-232                                             ",
-                " pistrunov pistrun pistrunovich                           %",
-                R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    %)",
+                R"(?~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~)",
+                "?&;          RGR Programming 1st semester          ?&;                 ",
+                "?&; University:       ;OmSTU                       ?&;         ",
+                "?&; Faculty:          ;FiTIKS                      ?&;         ",
+                "?&; Group:           ;IST-231                      ?&;         ",
+                "?&?        Prokofyev Maksim Viacheslavovich        ?&;       ",
+                "?&; Hobbies:   ;Videography, Taekwon-Do            ?&; ",
+                "?&; Favorite анекдот:                              ?&;",
+                "?&?          петля» – подумал Штирлиц.             ?&;",
+                "?&?          В дверь постучали. «Временная         ?&;",
+                R"(?~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~&~%)",
         };
     }
 

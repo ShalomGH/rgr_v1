@@ -8,6 +8,8 @@
 #define GREEN_CODE   "\033[32m"      /* Green */
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
 
+#define Pi 3.14
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -262,7 +264,7 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 12, A = 2, B = 4;
+    const int N = 20, A = 0, B = Pi;
 
     static double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);

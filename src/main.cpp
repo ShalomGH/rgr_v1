@@ -266,16 +266,15 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 20, A = 0, B = 2* M_PI;
+    const int N = 20, A = 0, B = 2 * 3.14;
 
-    static float F1(float x) {
+    static double F1(double x) {
         return 5 - 3 * cos(x);
     }
 
-    static float F2(float x) {
-        return pow(1 + pow(sin(x) , 2) ,1/2);
+    static double F2(double x) {
+        return pow(1 + pow(sin(x),2), 1.0/2.0);
     }
-
 protected:
     void fillMenuItems() override {
         vector<vector<double>> XF1F2 = calculateArray();
@@ -311,7 +310,7 @@ protected:
     }
 
 private:
-    const double dX = fabs(B - A) / (N - 1.0);
+    const double dX = (B - A) / (N - 1.0);
 
 public:
     Table() {
@@ -325,7 +324,7 @@ private:
         for (auto &i: XF1F2) i.resize(N);
         XF1F2[0][0] = double(A);
         for (int i = 0; i < N; i++) {
-            if (i != 0) XF1F2[0][i] = XF1F2[0][i - 1] + dX;
+            XF1F2[0][i] = A + i * dX;
             XF1F2[1][i] = F1(XF1F2[0][i]);
             XF1F2[2][i] = F2(XF1F2[0][i]);
         }
@@ -348,8 +347,8 @@ private:
 class Graphic : public Screen {
 private:
     vector<string> functionsNames{
-            ";* - E^(2 * x) * x^(1 / 3) - sin(x) % ",
-            "?# - 10 / (2 + x^2)                 % ",
+            ";* - 5 - 3 cos(x)                   % ",
+            "?# - sqrt(1 + sin(x)^2)             % ",
     };
 
     static double F1(double x) {
@@ -357,7 +356,7 @@ private:
     }
 
     static double F2(double x) {
-        return pow(1 + pow(sin(x) , 2) ,1/2);
+        return pow(1 + pow(sin(x) , 2) ,1.0/2.0);
     }
 
 
@@ -459,7 +458,7 @@ private:
     const double e = 0.001;
 
     static double function(double x) {
-        return pow(x, 3) + 3 * x + 2;
+        return 0.5 + cos(x) - 2*x*sin(x);
     }
 
     bool opened = true;

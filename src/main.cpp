@@ -9,6 +9,8 @@
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
 #define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
 
+#define Pi 3.14
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -264,7 +266,7 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 12, A = 2, B = 4;
+    const int N = 20, A = 0, B = Pi;
 
     static double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);

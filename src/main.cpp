@@ -373,7 +373,7 @@ private:
     }
     void drawGraphic() {
         const double xScale = SCREEN_WIDTH / (2 * M_PI) / scale;
-        const double -yScale = SCREEN_HEIGHT / 2.0 / scale;
+        const double yScale = -SCREEN_HEIGHT / 2.0 / scale;
         for (int x = 1; x < SCREEN_WIDTH - 1; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y1 = static_cast<int>(round(F1(radians) * yScale)) + SCREEN_HEIGHT / 2.0;

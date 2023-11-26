@@ -457,7 +457,7 @@ private:
     const double e = 0.001;
 
     static double function(double x) {
-        return pow(x, 3) + 3 * x + 2;
+        return 5*x*x - 2*x * log(x-7);
     }
 
     bool opened = true;
@@ -493,7 +493,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "____________________________________________________",
-                format("| Equation x^3 + 3x + 2 = 0 on the segment[{:3},{:3}]|", A, B),
+                format("| Equation 5x^2-2x*ln(x-7) = 0 on segment [{:3},{:3}]|", A, B),
                 "----------------------------------------------------",
                 "----------------------------------------------------",
                 format("| Bisection method:                 {:14f} |", bisectionMethod()),
@@ -540,7 +540,7 @@ private:
     const double e = 0.001;
 
     static double function(double x) {
-        return cos(x) * pow(M_E, x);
+        return x*x * log(x);
     }
 
     bool opened1 = true;
@@ -549,7 +549,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "---------------------------------------------",
-                format("| cos(x) * pow(e, x) on the segment[{:3},{:3}]|",A,B),
+                format("| x^2 * ln x on the segment [{:3},{:3}]       |",A,B),
                 "---------------------------------------------",
                 "---------------------------------------------",
                 format("| Right Rectangle method:  {:16f} |", rectangleMethod()),
@@ -676,12 +676,12 @@ private:
                 "$        $          $$$$$ $$$$     $$$",
                 "$      $$$$$           $$$$$$$$$$$$$$",
                 "$     $$ $ $$$            $  $$$     ",
-                "$     $  $$  $$$      $$$ $   $$$$     ",
-                "$      $  $$   $      $ $$$      $ $    ",
-                "$$  $$$$   $$$$$$     $$ $ $      $$$$   ",
+                "$     $  $$  $$$      $$$ $   $$$$    ",
+                "$      $  $$   $      $ $$$      $$   ",
+                "$$  $$$$   $$$$$$     $$ $ $      $$   ",
                 " $$$$$$$      $$$      $$$  $       $$$   ",
-                "                 $     $$  $$$       $  $$",
-                "                 $$     $$$ $$$         $$",
+                "                 $     $$  $$$       $$",
+                "                 $$     $$$ $$$        $$",
                 "                  $$      $$ $$$$$     $$",
                 "                   $$$$ $$$     $$$$$$$",
                 "                     $$$$$",

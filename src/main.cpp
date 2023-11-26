@@ -3,19 +3,13 @@
 #include <vector>
 #include <cmath>
 #include <chrono>
-
 #define RESET_CODE   "\033[0m"
 #define GREEN_CODE   "\033[32m"      /* Green */
 #define MAGENTA_CODE "\033[35m"      /* Magenta */
 #define CLEAR_CODE u8"\033[2J\033[1;1H" /* clear console */
-
-#define Pi 3.14
-
 #ifdef _WIN32
-
 #include <windows.h>
 #include <conio.h>
-
 #else
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -43,10 +37,8 @@ public:
     static const char MAGENTA = '?';
     static const char RESET = '%';
 };
-
 static auto previousButtonsTime = std::chrono::system_clock::now();
 static const int baseButtonsDelay = 250;
-
 class Buttons {
 public:
     enum Keys {
@@ -56,7 +48,6 @@ public:
         ENTER,
         ESC,
     };
-
     static int getKeyCode() {
         auto now = std::chrono::system_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousButtonsTime).count() -
@@ -98,7 +89,6 @@ public:
 #endif
     }
 };
-
 enum ScreenIds {
     MENU = 0,
     TABLE,
@@ -109,10 +99,7 @@ enum ScreenIds {
     AUTHOR,
     EXIT,
 };
-
 ScreenIds screenId = ScreenIds::MENU;
-
-
 class Screen {
 protected:
     vector<vector<char>> canvas;
@@ -120,9 +107,7 @@ protected:
 
     size_t yStart;
     size_t xStart;
-
 public:
-
     virtual void render() {
         switch (Buttons::getKeyCode()) {
             case (Buttons::Keys::ESC):
@@ -130,7 +115,6 @@ public:
                 break;
         }
     };
-
     virtual void update() {
 #ifdef _WIN32
        cout << CLEAR_CODE;
@@ -164,14 +148,12 @@ protected:
         calculateCords();
         drawMenuItems();
     }
-
     static vector<vector<char>> generateCanvas() {
         vector<vector<char>> canvas1;
         canvas1.resize(SCREEN_HEIGHT);
         for (auto &i: canvas1) i.resize(SCREEN_WIDTH);
         return canvas1;
     }
-
     virtual void drawMenuItems() {
         for (int i = 0; i < menuItems.size(); i++) {
             for (int j = 0; j < menuItems[i].size(); j++) {
@@ -185,7 +167,6 @@ protected:
             }
         }
     }
-
     virtual void fillMenuItems() {};
 private:
     virtual void calculateCords() {
@@ -193,8 +174,6 @@ private:
         xStart = (SCREEN_WIDTH - menuItems[1].size()) / 2;
     }
 };
-
-
 class Menu : public Screen {
 protected:
     void fillMenuItems() override {
@@ -209,10 +188,8 @@ protected:
                 "7.  Exit     ",
         };
     }
-
 private:
     int point = 1;
-
     size_t yPoint;
     size_t xPoint;
 public:
@@ -222,7 +199,6 @@ public:
         xPoint = xStart - 2;
         canvas[yPoint][xPoint] = '*';
     }
-
     void render() override {
         switch (Buttons::getKeyCode()) {
             case (Buttons::Keys::ARROW_DOWN):
@@ -236,24 +212,20 @@ public:
                 break;
         }
     }
-
     void update() override {
         checkPointPosition();
         Screen::update();
     }
-
     void movePointDown() {
         if (point < 7) point++;
         else point = 1;
         update();
     }
-
     void movePointUp() {
         if (point > 1) point--;
         else point = 7;
         update();
     }
-
 private:
     void checkPointPosition() {
         if (yStart + point != yPoint) {
@@ -267,35 +239,24 @@ private:
 class Table : public Screen {
 private:
     const int N = 20, A = 0, B = M_PI;
-
-    static double F1(double x) {
-        return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
-    }
-
-    static double F2(double x) {
-        return 10 / (2 + x * x);
-    }
-
+    static double F1(double x) {return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);}
+    static double F2(double x) {return 10 / (2 + x * x);}
 protected:
     void fillMenuItems() override {
         vector<vector<double>> XF1F2 = calculateArray();
-
         double maxF1 = findMax(XF1F2[1]);
         double maxF2 = findMax(XF1F2[2]);
         double minF1 = findMin(XF1F2[1]);
         double minF2 = findMin(XF1F2[2]);
-
         menuItems = {
                 "____________________________________________",
                 "|   i    |   x[i]  |    F1[i]  |    F2[i]  |",
                 "|________|_________|___________|___________|",
         };
-
         for (int i = 0; i < N; i++) {
             menuItems.emplace_back("|        |        |            |           |");
-            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#9g | %#9g |", i, XF1F2[0][i], XF1F2[1][i],
+            sprintf(menuItems[i + 3].data(), "|   %-2d   | %#2g | %#8g | %#8g", i, XF1F2[0][i], XF1F2[1][i],
                     XF1F2[2][i]);
-
             menuItems[i + 3][21] = (XF1F2[1][i] == maxF1) ? Color::GREEN : (XF1F2[1][i] == minF1) ? Color::MAGENTA
                                                                                                   : ' ';
             menuItems[i + 3][30] = Color::RESET;
@@ -309,15 +270,12 @@ protected:
         menuItems.emplace_back("?Min F1: " + to_string(minF1));
         menuItems.emplace_back(" Min F2: " + to_string(minF2) + "%");
     }
-
 private:
     const double dX = fabs(B - A) / (N - 1.0);
-
 public:
     Table() {
         configureScreen();
     }
-
 private:
     [[nodiscard]] vector<vector<double>> calculateArray() const {
         vector<vector<double>> XF1F2;
@@ -331,38 +289,30 @@ private:
         }
         return XF1F2;
     }
-
     [[nodiscard]] double findMax(vector<double> F) const {
         double max1 = F[0];
         for (int i = 0; i < N; i++) if (F[i] > max1)max1 = F[i];
         return max1;
     }
-
     [[nodiscard]] double findMin(vector<double> F) const {
         double min1 = F[0];
         for (int i = 0; i < N; i++) if (F[i] < min1)min1 = F[i];
         return min1;
     }
 };
-
 class Graphic : public Screen {
 private:
     vector<string> functionsNames{
             ";* - E^(2 * x) * x^(1 / 3) - sin(x) % ",
             "?# - 10 / (2 + x^2)                 % ",
     };
-
     static double F1(double x) {
         return pow(M_E, 2 * x) * pow(x, 1 / 3) - sin(x);
     }
-
     static double F2(double x) {
         return 10 / (2 + x * x);
     }
-
-
     int scale = 2;
-
 public:
     Graphic() {
         canvas = generateCanvas();
@@ -370,7 +320,6 @@ public:
         drawGraphic();
         drawFunctionsNames();
     }
-
     void render() override {
         switch (Buttons::getKeyCode()) {
             case (Buttons::Keys::ARROW_DOWN):
@@ -384,7 +333,6 @@ public:
                 break;
         }
     }
-
     void update() override {
         canvas = generateCanvas();
         drawCoordinates();
@@ -393,44 +341,36 @@ public:
         drawCordNames();
         Screen::update();
     }
-
 protected:
     void fillMenuItems() override {
         menuItems = {" "};
     }
-
 private:
-
     void drawCordNames() {
         canvas[SCREEN_HEIGHT / 2 - 1][SCREEN_WIDTH - 1] = 'X';
         canvas[0][SCREEN_WIDTH / 2 + 1] = 'Y';
     }
-
     void zoomOut() {
         if (scale >= 10) return;
         scale++;
         update();
     }
-
     void zoomIn() {
         if (scale < 2) return;
         scale--;
         update();
     }
-
     void drawFunctionsNames() {
         for (int x = 0; x < functionsNames[0].size() - 1; ++x) {
             canvas[0][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[0][x];
             canvas[1][SCREEN_WIDTH - functionsNames[0].size() + x] = functionsNames[1][x];
         }
     }
-
     void drawCoordinates() {
         for (int x = 0; x < SCREEN_WIDTH; ++x) canvas[SCREEN_HEIGHT / 2][x] = '-';
         for (int y = 0; y < SCREEN_HEIGHT; ++y) canvas[y][SCREEN_WIDTH / 2] = '|';
         canvas[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = '+';
     }
-
     void drawGraphic() {
         const double xScale = SCREEN_WIDTH / (2 * M_PI) / scale;
         const double yScale = SCREEN_HEIGHT / 2.0 / scale;
@@ -457,18 +397,14 @@ class Equation : public Screen {
 private:
     int A = 0, B = 0;
     const double e = 0.001;
-
     static double function(double x) {
         return pow(x, 3) + 3 * x + 2;
     }
-
     bool opened = true;
-
 public:
     Equation() {
         configureScreen();
     }
-
     void render() override {
         if (opened) {
             opened = false;
@@ -509,9 +445,7 @@ protected:
         sprintf(menuItems[4].data(), "| Bisection method:                     %8f  |", bisectionMethod());
         sprintf(menuItems[7].data(), "| Chords method:                        %8f  |", chordsMethod());
     }
-
 private:
-
     [[nodiscard]] double bisectionMethod() const {
         double a = A, b = B, x = 0;
         while ((b - a) > e) {
@@ -525,7 +459,6 @@ private:
         if (answer<A || answer>B) return NAN;
         return answer;
     }
-
     [[nodiscard]] double chordsMethod() const {
         double a = A, b = B;
         while (fabs(function(b)) > e) {
@@ -543,13 +476,10 @@ private:
     int A = 0; int B = 0;
     const int N = 10000;
     const double e = 0.001;
-
     static double function(double x) {
         return cos(x) * pow(M_E, x);
     }
-
     bool opened = true;
-
 protected:
     void fillMenuItems() override {
         menuItems = {
@@ -573,25 +503,18 @@ protected:
                 "---------------------------------------------",
                 "  e = " + to_string(e),
         };
-
         sprintf(menuItems[1].data(), "| cos(x) * pow(e, x) on the segment[%3d,%3d]|", A, B);
         sprintf(menuItems[4].data(),  "| Right Rectangle method:  %8f", rectangleMethod());
         sprintf(menuItems[7].data(), "| Trapeze method:           %8f", trapezeMethod());
         sprintf(menuItems[10].data(), "| Gauss method:            %8f", gaussMethod());
         sprintf(menuItems[13].data(), "| Monte Carlo method:      %8f", monteCarloMethod());
         sprintf(menuItems[16].data(), "| Middle Rectangle method: %8f", midRectangleMethod());
-
-
-
     }
-
     const double H = fabs(B - A) / N;
-
 public:
     Integrals() {
         configureScreen();
     }
-
     void render() override {
         if (opened) {
             opened = false;
@@ -615,7 +538,6 @@ public:
                 break;
         }
     }
-
 private:
     [[nodiscard]] double trapezeMethod() const {
         double s = function(A) + function(B);
@@ -623,14 +545,12 @@ private:
         const double answer = (H / 2.0) * s;
         return answer;
     }
-
     [[nodiscard]] double rectangleMethod() const {
         double s = 0;
         for (double x = B; x > A; x -= e) s += function(x) * e;
         const double answer = s;
         return answer;
     }
-
     [[nodiscard]] double gaussMethod() const {
         const double weights[3] = {-0.7745967, 0, 0.7745967};
         const double nodes[3] = {0.5555556, 0.8888889, 0.5555556};
@@ -643,8 +563,6 @@ private:
         const double answer = ra*S;
         return answer;
     }
-
-
     [[nodiscard]] double monteCarloMethod() const {
         const int n = N * 100;
         double sum = 0.0;
@@ -655,7 +573,6 @@ private:
         const double answer = (B - A) * sum / n;
         return answer;
     }
-
     [[nodiscard]] double midRectangleMethod() const {
         double h = fabs(B - A) / N, sum = 0.0;
         for (int i = 0; i < N; i++) sum += function(A + (i + 0.5) * h);
@@ -679,8 +596,6 @@ private:
         };
     }
     const int delay = 10;
-
-
     const vector<vector<char>> voidCanvas = generateCanvas();
 
 public:
@@ -688,7 +603,6 @@ public:
         configureScreen();
         xStart = 0;
     }
-
     void render() override {
         auto now = std::chrono::system_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previousAnimationTime).count() - delay > 0) {
@@ -699,7 +613,6 @@ public:
         }
         Screen::render();
     }
-
 private:
     void moveDrawing() {
         if (xStart < SCREEN_WIDTH - 1 || xStart > 0 - menuItems[0].size() - 1) xStart++;
@@ -707,7 +620,6 @@ private:
         drawMenuItems();
     }
 };
-
 class Author : public Screen {
 protected:
     void fillMenuItems() override {
@@ -721,14 +633,11 @@ protected:
                 R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /    %)",
         };
     }
-
 public:
     Author() {
         configureScreen();
     }
 };
-
-
 static void configure() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -744,13 +653,9 @@ static void configure() {
     SCREEN_WIDTH = size.ws_col;
 #endif
 }
-
-
 int main() {
     configure();
     Screen *screens[7];
-
-
     screens[0] = new Menu;
     screens[1] = new Table;
     screens[2] = new Graphic;
@@ -758,9 +663,7 @@ int main() {
     screens[4] = new Integrals;
     screens[5] = new Animation;
     screens[6] = new Author;
-
     ScreenIds preId = ScreenIds::TABLE;
-
     while (screenId != ScreenIds::EXIT) {
         if (screenId != preId) {
             screens[screenId]->update();
@@ -768,7 +671,6 @@ int main() {
         }
         screens[screenId]->render();
     }
-
     for (auto &screen: screens) delete screen;
     exit(1);
 }

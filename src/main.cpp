@@ -540,6 +540,7 @@ public:
     }
 private:
     [[nodiscard]] double trapezeMethod() const {
+        double H = fabs(B - A) / N;
         double s = function(A) + function(B);
         for (int i = 1; i < N; i++) s += 2.0 * function(A + i * H);
         const double answer = (H / 2.0) * s;

@@ -492,6 +492,7 @@ public:
 protected:
     void fillMenuItems() override {
         menuItems = {
+                "-- == { Enter the segment of equation } == --",
                 "____________________________________________________",
                 format("| Equation 5x^2-2x*ln(x-7) = 0 on segment [{:3},{:3}]|", A, B),
                 "----------------------------------------------------",
@@ -548,6 +549,7 @@ private:
 protected:
     void fillMenuItems() override {
         menuItems = {
+                "-- == { Enter the segment of equation } == --",
                 "---------------------------------------------",
                 format("| x^2 * ln x on the segment [{:3},{:3}]       |",A,B),
                 "---------------------------------------------",

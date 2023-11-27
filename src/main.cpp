@@ -438,6 +438,7 @@ public:
 protected:
     void fillMenuItems() override {
         menuItems = {
+                "-- == { Enter the segment of equation } == --",
                 "____________________________________________________",
                 "| Equation x * ex – 2 x^2  - 1 = 0 interval [  ,  ]|",
                 "----------------------------------------------------",
@@ -490,6 +491,7 @@ private:
 protected:
     void fillMenuItems() override {
         menuItems = {
+                "-- == { Enter the segment of integral } == --",
                 "---------------------------------------------",
                 "| sqrt(x * x + 3)  on interval [    ,    ]  |",
                 "---------------------------------------------",

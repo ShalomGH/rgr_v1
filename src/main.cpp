@@ -238,9 +238,9 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 16, A = 0, B = M_PI;
-    static double F1(double x) {return 2*sin(2*x)+1;}
-    static double F2(double x) {return pow(x+5,3)*(1+pow(sin(x),2));}
+    const int N = 10, A = 1, B = 2;
+    static double F1(double x) {return pow(M_E, 2*x) * pow(x, 1/3) - sin(x);}
+    static double F2(double x) {return 10/(2+x*x);}
 protected:
     void fillMenuItems() override {
         vector<vector<double>> XF1F2 = calculateArray();
@@ -303,15 +303,11 @@ private:
 class Graphic : public Screen {
 private:
     vector<string> functionsNames{
-            "* - 2sin(2x)+1           ",
-            "# - (x+5)^3*(1+sin(x)^2) ",
+            "* - e^(2x) * x^(1/3) - sin(x) ",
+            "# - 10/(2+x^2)                ",
     };
-    static double F1(double x) {
-        return 2*sin(2*x)+1;
-    }
-    static double F2(double x) {
-        return pow(x+5,3)*(1+pow(sin(x),2));
-    }
+    static double F1(double x) {return pow(M_E, 2*x) * pow(x, 1/3) - sin(x);}
+    static double F2(double x) {return 10/(2+x*x);}
     int scale = 2;
 public:
     Graphic() {
@@ -398,7 +394,7 @@ private:
     int A = 0, B = 0;
     const double e = 0.001;
     static double function(double x) {
-        return 2*log(x+1) - x + 1;
+        return x*x*x+3*x+2;
     }
     bool opened = true;
 public:
@@ -432,7 +428,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "____________________________________________________",
-                "| Equation 2*ln(x+1) - x+ 1 on the segment[   ,   ]|",
+                "| Equation x^3 + 3x + 2 = 0 on the segment[   ,   ]|",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
                 "| Bisection method:                                |",
@@ -441,7 +437,7 @@ protected:
                 "| Chords method:                                   |",
                 "----------------------------------------------------",
         };
-        sprintf(menuItems[1].data(), "| Equation 2*ln(x+1) - x+ 1 on the segment[%3d,%3d]|", A, B);
+        sprintf(menuItems[1].data(), "| Equation x^3 + 3x + 2 = 0 on the segment[%3d,%3d]|", A, B);
         sprintf(menuItems[4].data(), "| Bisection method:                     %8f  |", bisectionMethod());
         sprintf(menuItems[7].data(), "| Chords method:                        %8f  |", chordsMethod());
     }
@@ -477,14 +473,14 @@ private:
     const int N = 10000;
     const double e = 0.001;
     static double function(double x) {
-        return pow(x, 2) * exp(-x);
+        return cos(x)*pow(M_E, x);
     }
     bool opened = true;
 protected:
     void fillMenuItems() override {
         menuItems = {
                 "---------------------------------------------",
-                "| x^2*e^-x           on the segment[   ,   ]|",
+                "| Integral cos(x) * e^x  on segment[   ,   ]|",
                 "---------------------------------------------",
                 "---------------------------------------------",
                 "| Right Rectangle method:                   |",
@@ -503,7 +499,7 @@ protected:
                 "---------------------------------------------",
                 "  e = " + to_string(e),
         };
-        sprintf(menuItems[1].data(), "| x^2*e^-x           on the segment[%3d,%3d]|", A, B);
+        sprintf(menuItems[1].data(), "| Integral cos(x) * e^x  on segment[%3d,%3d]|", A, B);
         sprintf(menuItems[4].data(),  "| Right Rectangle method:  %8f", rectangleMethod());
         sprintf(menuItems[7].data(), "| Trapeze method:           %8f", trapezeMethod());
         sprintf(menuItems[10].data(), "| Gauss method:            %8f", gaussMethod());
@@ -590,14 +586,14 @@ class Animation : public Screen {
 private:
     void fillMenuItems() override {
         menuItems = {
-                "______          ",
-                " |o  |   !      ",
-                " |:`_|---'-.    ",
-                "_.-.'_'.-----.| ",
-                "'._.'        (O)",
+                " _________________________    ",
+                "|   |     |     |    | |  \\  ",
+                "|___|_____|_____|____|_|___\\ ",
+                "|                    | |    \\",
+                "`--(o)(o)--------------(o)--' ",
         };
     }
-    const int delay = 50;
+    const int delay = 15;
     const vector<vector<char>> voidCanvas = generateCanvas();
 
 public:
@@ -626,14 +622,13 @@ class Author : public Screen {
 protected:
     void fillMenuItems() override {
         menuItems = {
-                R"(;|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|%)",
-                "?\u001b[47mRGR for programming           &#&                  \u001b[47m%",
-                "?\u001b[47mUniversity: OmSTU             ^_^                  \u001b[47m%",
-                "?\u001b[44mFaculty: FiTIKS               OwO                  \u001b[44m%",
-                "?\u001b[44mGroup: IST-231                O.O                  \u001b[44m%",
-                "?\u001b[41mGarder Alexandr Denisovich    $*$                  \u001b[41m%",
-                "?\u001b[41mHobby Modelizm                X_X                  %",
-                R"(;|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|%)",
+                R"(;/ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \%)",
+                "? RGR for programming                                 %",
+                "? University: OmSTU                                   %",
+                "? Faculty: FiTIKS                                     %",
+                "? Group: PI-232                                       %",
+                "? Zagarov Svyatoslav Alexseevich                      %",
+                R"(;\ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /%)",
         };
     }
 public:

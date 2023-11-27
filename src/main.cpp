@@ -603,7 +603,7 @@ private:
                 "   `ooo'   `---'          |_| |_|  ",
         };
     }
-    const int delay = 10;
+    const int delay = 50;
     const vector<vector<char>> voidCanvas = generateCanvas();
 
 public:

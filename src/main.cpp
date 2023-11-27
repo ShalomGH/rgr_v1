@@ -266,7 +266,7 @@ private:
 
 class Table : public Screen {
 private:
-    const int N = 20, A = 0, B = 2 * 3.14;
+    const int N = 20, A = 0, B = 2 * M_PI;
 
     static double F1(double x) {
         return 5 - 3 * cos(x);
@@ -303,10 +303,10 @@ protected:
             menuItems[i + 3][42] = Color::RESET;
         }
         menuItems.emplace_back("|__________________________________________|");
-        menuItems.emplace_back(";Max F1: " + to_string(maxF1));
-        menuItems.emplace_back(" Max F2: " + to_string(maxF2) + "%");
         menuItems.emplace_back("?Min F1: " + to_string(minF1));
         menuItems.emplace_back(" Min F2: " + to_string(minF2) + "%");
+        menuItems.emplace_back(";Max F1: " + to_string(maxF1));
+        menuItems.emplace_back(" Max F2: " + to_string(maxF2) + "%");
     }
 
 private:
@@ -432,7 +432,7 @@ private:
 
     void drawGraphic() {
         const double xScale = SCREEN_WIDTH / (2 * M_PI) / scale;
-        const double yScale = SCREEN_HEIGHT / 2.0 / scale;
+        const double yScale = -SCREEN_HEIGHT / 2.0 / scale;
         for (int x = 1; x < SCREEN_WIDTH - 1; ++x) {
             double radians = (x - SCREEN_WIDTH / 2.0) / xScale;
             int y1 = static_cast<int>(round(F1(radians) * yScale)) + SCREEN_HEIGHT / 2.0;
@@ -495,7 +495,7 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "____________________________________________________",
-                "| Equation x^3 + 3x + 2 = 0 on the segment[   ,   ]|",
+                "|Equation 0.5 + cos(x) - 2x*sin(x) = 0 on [   ,   ]|",
                 "----------------------------------------------------",
                 "----------------------------------------------------",
                 "| Bisection method:                                |",
@@ -503,8 +503,10 @@ protected:
                 "----------------------------------------------------",
                 "| Chords method:                                   |",
                 "----------------------------------------------------",
+                "| Введите интервал для поиска корня:               |",
+                "----------------------------------------------------",
         };
-        sprintf(menuItems[1].data(), "| Equation x^3 + 3x + 2 = 0 on the segment[%3d,%3d]|", A, B);
+        sprintf(menuItems[1].data(), "|Equation 0.5 + cos(x) - 2x*sin(x) = 0 on[%3d,%3d]|", A, B);
         sprintf(menuItems[4].data(), "| Bisection method:                     %8f  |", bisectionMethod());
         sprintf(menuItems[7].data(), "| Chords method:                        %8f  |", chordsMethod());
     }
@@ -544,7 +546,7 @@ private:
     const double e = 0.001;
 
     static double function(double x) {
-        return cos(x) * pow(M_E, x);
+        return 1 / (x + pow(cos(x),1.0/2.0));
     }
 
     bool opened = true;
@@ -553,7 +555,10 @@ protected:
     void fillMenuItems() override {
         menuItems = {
                 "---------------------------------------------",
-                "| cos(x) * pow(e, x) on the segment[   ,   ]|",
+                "| Введите интервал интегрирования:          |",
+                "---------------------------------------------",
+                "---------------------------------------------",
+                "| 1 / (x + sqrt(cos(x))  on segment[   ,   ]|",
                 "---------------------------------------------",
                 "---------------------------------------------",
                 "| Right Rectangle method:                   |",
@@ -572,13 +577,13 @@ protected:
                 "---------------------------------------------",
                 "  e = " + to_string(e),
         };
-
-        sprintf(menuItems[1].data(), "| cos(x) * pow(e, x) on the segment[%3d,%3d]|", A, B);
-        sprintf(menuItems[4].data(),  "| Right Rectangle method:  %8f", rectangleMethod());
-        sprintf(menuItems[7].data(), "| Trapeze method:           %8f", trapezeMethod());
-        sprintf(menuItems[10].data(), "| Gauss method:            %8f", gaussMethod());
-        sprintf(menuItems[13].data(), "| Monte Carlo method:      %8f", monteCarloMethod());
-        sprintf(menuItems[16].data(), "| Middle Rectangle method: %8f", midRectangleMethod());
+        sprintf(menuItems[1].data(),  "| Введите интервал интегрирования:         |");
+        sprintf(menuItems[4].data(),  "| 1 / (x + sqrt(cos(x))  on segment[%3d,%3d]|", A, B);
+        sprintf(menuItems[7].data(),  "| Right Rectangle method:  %8f", rectangleMethod());
+        sprintf(menuItems[10].data(),  "| Trapeze method:          %8f", trapezeMethod());
+        sprintf(menuItems[13].data(), "| Gauss method:            %8f", gaussMethod());
+        sprintf(menuItems[16].data(), "| Monte Carlo method:      %8f", monteCarloMethod());
+        sprintf(menuItems[19].data(), "| Middle Rectangle method: %8f", midRectangleMethod());
 
 
 
@@ -617,6 +622,7 @@ public:
 
 private:
     [[nodiscard]] double trapezeMethod() const {
+        double H = fabs(B - A) / N;
         double s = function(A) + function(B);
         for (int i = 1; i < N; i++) s += 2.0 * function(A + i * H);
         const double answer = (H / 2.0) * s;
@@ -670,14 +676,14 @@ class Animation : public Screen {
 private:
     void fillMenuItems() override {
         menuItems = {
-                " _________________________    ",
-                "|   |     |     |    | |  \\  ",
-                "|___|_____|_____|____|_|___\\ ",
-                "|                    | |    \\",
-                "`--(o)(o)--------------(o)--' ",
+                "   _________     ",
+                "   |  ____ |  __ ",
+                "   |  | _| | | .|",
+                " __|  |____|_| | ",
+                "|__|___________| ",
         };
     }
-    const int delay = 10;
+    const int delay = 100;
 
 
     const vector<vector<char>> voidCanvas = generateCanvas();
